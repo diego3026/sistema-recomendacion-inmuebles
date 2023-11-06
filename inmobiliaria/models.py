@@ -75,7 +75,7 @@ class InmueblePorUsuario(models.Model):
     clasificacion = models.FloatField()
     
 
-# # class UsuarioManager(models.Manager):
+# class UsuarioManager(models.Manager):
 #     @classmethod
 #     def autenticar_usuario(cls, email, password):
 #         try:
