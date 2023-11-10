@@ -3,49 +3,44 @@ from django.contrib.auth.hashers import make_password
 from django.contrib.auth import get_user_model
 
 class Sector(models.Model):
-    idSector = models.AutoField(primary_key=True)
     nombre = models.CharField(max_length=255)
 
     def __str__(self):
-        return 
+        return self.nombre
 
 class TipoDeCaracteristica(models.Model):
-    idtipoDeCaracteristicas = models.AutoField(primary_key=True)
     nombre = models.CharField(max_length=255)
     
-class Usuario(models.Model):
-    idUsuario = models.BigAutoField(primary_key=True)
-    email = models.CharField(max_length = 30, unique = True)
-    password = models.CharField(max_length = 255)
-    nombre = models.CharField(max_length=255)
-    apellido = models.CharField(max_length=255)
-    edad = models.PositiveIntegerField()
-
-    def save(self, **kwargs):
-        clave = 'mMUj0DrIK6vgtdIYepkIxN'
-        self.password = make_password(self.password, clave)
-        super().save(**kwargs)
+    def __str__(self):
+        return self.nombre
 
 class Caracteristica(models.Model):
-    idCaracteristicas = models.AutoField(primary_key=True)
     nombre = models.CharField(max_length=255)
-    idTipoCaracteristica = models.ForeignKey(TipoDeCaracteristica, on_delete=models.CASCADE)
+    tipoDeCaracteristica = models.ForeignKey(TipoDeCaracteristica, on_delete=models.CASCADE)
+    
+    def __str__(self):
+        return f"{self.nombre} - {self.idTipoCaracteristica.nombre}"
 
 class Pais(models.Model):
-    idPais = models.AutoField(primary_key=True)
     nombre = models.CharField(max_length=255)
+    
+    def __str__(self):
+        return self.nombre
     
 class Ciudad(models.Model):
-    idCiudad = models.AutoField(primary_key=True)
     nombre = models.CharField(max_length=255)
-    idPais = models.ForeignKey(Pais, on_delete=models.CASCADE)   
+    pais = models.ForeignKey(Pais, on_delete=models.CASCADE)   
+    
+    def __str__(self):
+        return self.nombre
 
 class TipoDeInmueble(models.Model):
-    idTipoDeInmueble = models.AutoField(primary_key=True)
     nombre = models.CharField(max_length=255)
     
+    def __str__(self):
+        return self.nombre
+    
 class Inmueble(models.Model):
-    idInmueble = models.AutoField(primary_key=True)
     nombre = models.CharField(max_length=50)
     descripcion = models.CharField(max_length=100)
     estrato = models.IntegerField()
@@ -61,18 +56,32 @@ class Inmueble(models.Model):
     precioAdministracion = models.IntegerField()
     precio = models.IntegerField()
     direccion = models.CharField(max_length=300)
-    idSector = models.ForeignKey(Sector, on_delete=models.CASCADE)
-    idCiudad = models.ForeignKey(Ciudad, on_delete=models.CASCADE)
-    idTipoDeInmueble = models.ForeignKey(TipoDeInmueble, on_delete = models.CASCADE)
-    caracteristicas = models.ManyToManyField(Caracteristica)
+    sector = models.ForeignKey(Sector, on_delete=models.CASCADE)
+    ciudad = models.ForeignKey(Ciudad, on_delete=models.CASCADE)
+    tipoDeInmueble = models.ForeignKey(TipoDeInmueble, on_delete = models.CASCADE)
+    caracteristicas = models.ManyToManyField('Caracteristica', related_name='caracteristicas')
 
     def __str__(self):
         return self.nombre
 
+class Usuario(models.Model):
+    email = models.CharField(max_length = 30, unique = True)
+    password = models.CharField(max_length = 255)
+    nombre = models.CharField(max_length=255)
+    apellido = models.CharField(max_length=255)
+    role = models.CharField(max_length=255)
+    edad = models.PositiveIntegerField()
+
+    def __str__(self):
+        return f"{self.nombre} {self.apellido}"
+
 class InmueblePorUsuario(models.Model):
-    idUsuario = models.ForeignKey(Usuario, on_delete=models.CASCADE)
-    idInmueble = models.ForeignKey(Inmueble, on_delete=models.CASCADE)
+    usuario = models.ForeignKey(Usuario, on_delete=models.CASCADE)
+    inmueble = models.ForeignKey(Inmueble, on_delete=models.CASCADE)
     clasificacion = models.FloatField()
+    
+    def __str__(self):
+        return f'{self.usuario} - {self.inmueble}'
     
 
 # class UsuarioManager(models.Manager):
@@ -103,9 +112,5 @@ class InmueblePorUsuario(models.Model):
 #             # Por ejemplo, manejar la excepción de violación de restricción única en el campo 'email'
 #             return None
     
-#     @classmethod
-#     def ver_usuarios(cls):
-#         # Recuperar todos los usuarios desde la base de datos utilizando el ORM de Django
-#         usuarios = cls.get_queryset().all()
-#         return usuarios
+
     

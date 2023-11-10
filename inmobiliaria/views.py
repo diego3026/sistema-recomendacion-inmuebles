@@ -5,51 +5,40 @@ from .models import *
 from .serializers import *
 from django.core.exceptions import FullResultSet
 
-
-class CustomModelViewSet(viewsets.ModelViewSet):
-    def list(self, request, *args, **kwargs):
-        try:
-            return super().list(request, *args, **kwargs)
-        except FullResultSet:
-            # Aquí puedes manejar la excepción FullResultSet según tus necesidades
-            return Response(
-                {"detail": "La consulta devolvió más resultados de los esperados."},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
-class PaisViewSet(CustomModelViewSet):
+    
+class PaisViewSet(viewsets.ModelViewSet):
     queryset = Pais.objects.all()
     serializer_class = PaisSerializer
 
-class CiudadViewSet(CustomModelViewSet):
+class CiudadViewSet(viewsets.ModelViewSet):
     queryset = Ciudad.objects.all()
     serializer_class = CiudadSerializer
 
-class SectorViewSet(CustomModelViewSet):
+class SectorViewSet(viewsets.ModelViewSet):
     queryset = Sector.objects.all()
     serializer_class = SectorSerializer
     
-class TipoDeCaracteristicaViewSet(CustomModelViewSet):
+class TipoDeCaracteristicaViewSet(viewsets.ModelViewSet):
     queryset = TipoDeCaracteristica.objects.all()
     serializer_class = TipoDeCaracteristicaSerializer
     
-class UsuarioViewSet(CustomModelViewSet):
+class UsuarioViewSet(viewsets.ModelViewSet):
     queryset = Usuario.objects.all()
     serializer_class = UsuarioSerializer
     
-class CaracteristicaViewSet(CustomModelViewSet):
+class CaracteristicaViewSet(viewsets.ModelViewSet):
     queryset = Caracteristica.objects.all()
     serializer_class = CaracteristicaSerializer
     
-class TipoDeInmuebleViewSet(CustomModelViewSet):
+class TipoDeInmuebleViewSet(viewsets.ModelViewSet):
     queryset = TipoDeInmueble.objects.all()
     serializer_class = TipoDeInmuebleSerializer
 
-class InmuebleViewSet(CustomModelViewSet):
+class InmuebleViewSet(viewsets.ModelViewSet):
     queryset = Inmueble.objects.all()
     serializer_class = InmuebleSerializer
     
-class InmueblePorUsuarioViewSet(CustomModelViewSet):
+class InmueblePorUsuarioViewSet(viewsets.ModelViewSet):
     queryset = InmueblePorUsuario.objects.all()
     serializer_class = InmueblePorUsuarioSerializer
 

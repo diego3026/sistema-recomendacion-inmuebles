@@ -37,8 +37,8 @@ INSTALLED_APPS = [
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
-    'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.messages',
     'rest_framework',
     #app
     'inmobiliaria',
@@ -98,18 +98,29 @@ WSGI_APPLICATION = 'sistema_inmuebles.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'sql_server.pyodbc',
+#         'NAME': 'BaseDeDatosInmobiliaria',
+#         'USER': 'administrador',
+#         'PASSWORD': 'BD_semillero_2023',
+#         'HOST': 'server-bds.database.windows.net',
+#         'PORT': '1433',
+#         'OPTIONS': {
+#             'driver': 'ODBC Driver 18 for SQL Server',
+#         },
+#     },
+# }
+
 DATABASES = {
     'default': {
-        'ENGINE': 'sql_server.pyodbc',
-        'NAME': 'BaseDeDatosInmobiliaria',
-        'USER': 'administrador',
-        'PASSWORD': 'BD_semillero_2023',
-        'HOST': 'server-bds.database.windows.net',
-        'PORT': '1433',
-        'OPTIONS': {
-            'driver': 'ODBC Driver 18 for SQL Server',
-        },
-    },
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'arquitectura-db',
+        'USER': 'diego',
+        'PASSWORD': '1234',
+        'HOST': 'localhost',
+        'PORT': '5432',
+    }
 }
 
 LOGGING = {
@@ -122,11 +133,11 @@ LOGGING = {
     },
     'root': {
         'handlers': ['console'],
-        'level': 'DEBUG',  # Puedes ajustar el nivel según tus necesidades, p. ej., 'INFO' o 'WARNING'.
+        'level': 'DEBUG',
     },
 }
 
-
+DEBUG_PROPAGATE_EXCEPTIONS = True
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
@@ -162,8 +173,8 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
-STATIC_URL = 'static/'
-STATICFILES_DTRS = (
+STATIC_URL = '/static/'
+STATICFILES_DIRS = (
     os.path.join(BASE_DIR, 'static'),
 )
 
@@ -175,7 +186,7 @@ MEDIA_URL = '/media/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-DATABASES['default']['ENGINE'] = 'sql_server.pyodbc'
+# DATABASES['default']['ENGINE'] = 'sql_server.pyodbc'
 
-DATABASES['default']['OPTIONS']['encrypt'] = True
-DATABASES['default']['OPTIONS']['trust_server_certificate'] = True
+# DATABASES['default']['OPTIONS']['encrypt'] = True
+# DATABASES['default']['OPTIONS']['trust_server_certificate'] = True
