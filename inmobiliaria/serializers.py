@@ -55,44 +55,52 @@ class TipoDeInmuebleSerializer(serializers.ModelSerializer):
 class InmuebleSerializer(serializers.ModelSerializer):
     sector = SectorSerializer()
     ciudad = CiudadSerializer()
-    caracteristicas = CaracteristicaSerializer(many = True)
-    
+    tipoDeInmueble = TipoDeInmuebleSerializer()
+    caracteristicas = CaracteristicaSerializer(many=True)
+
     class Meta:
         model = Inmueble
         fields = '__all__'
-    
+
     def create(self, validated_data):
         sector_data = validated_data.pop('sector')
         ciudad_data = validated_data.pop('ciudad')
+        tipo_inmueble_data = validated_data.pop('tipoDeInmueble')
         caracteristicas_data = validated_data.pop('caracteristicas')
-        
-        inmueble_instance = Inmueble.objects.create(**validated_data)
+        pais_data = ciudad_data.pop('pais')
+        pais_instance, _ = Pais.objects.get_or_create(**pais_data)
+
+        sector_instance, created = Sector.objects.get_or_create(**sector_data)
+        ciudad_instance, _ = Ciudad.objects.get_or_create(pais=pais_instance, **ciudad_data)
+        tipo_inmueble_instance, _ = TipoDeInmueble.objects.get_or_create(**tipo_inmueble_data)
+
+        inmueble_instance = Inmueble.objects.create(
+            sector=sector_instance,
+            ciudad=ciudad_instance,
+            tipoDeInmueble=tipo_inmueble_instance,
+            **validated_data
+        )
 
         for caracteristica_data in caracteristicas_data:
-            caracteristica_instance, _ = Caracteristica.objects.get_or_create(**caracteristica_data)
+            tipoDeCaracteristica_data = caracteristica_data.pop('tipoDeCaracteristica')
+            tipoDeCaracteristica_instance, _ = TipoDeCaracteristica.objects.get_or_create(**tipoDeCaracteristica_data)
+            caracteristica_instance, _ = Caracteristica.objects.get_or_create(tipoDeCaracteristica=tipoDeCaracteristica_instance,**caracteristica_data)
             inmueble_instance.caracteristicas.add(caracteristica_instance)
-    
-        ciudad_instance, _ = Ciudad.objects.get_or_create(**ciudad_data)
-        sector_instance, _ = Sector.objects.get_or_create(**sector_data)
-        inmueble_instance.sector = sector_instance
-        inmueble_instance.ciudad = ciudad_instance
-        inmueble_instance.save()
+
         return inmueble_instance
 
 class InmueblePorUsuarioSerializer(serializers.ModelSerializer):
-    usuario = UsuarioSerializer()
-    inmueble = InmuebleSerializer()
-    
+    usuario = serializers.SlugRelatedField(slug_field='nombreDeUsuario', queryset=Usuario.objects.all())
+    inmueble = serializers.SlugRelatedField(slug_field='url', queryset=Inmueble.objects.all())
+
     class Meta:
         model = InmueblePorUsuario
         fields = '__all__'
         
     def create(self, validated_data):
         usuario_data = validated_data.pop('usuario')
-        usuario_instance, _ = Sector.objects.get_or_create(**usuario_data)
         inmueble_data = validated_data.pop('inmueble')
-        inmueble_instance, _ = Ciudad.objects.get_or_create(**inmueble_data)
         
-        inmueblePorUsuario_instance = InmueblePorUsuario.objects.create(usuario=usuario_instance,inmueble=inmueble_instance, **validated_data)
+        inmueblePorUsuario_instance = InmueblePorUsuario.objects.create(usuario=usuario_data,inmueble=inmueble_data, **validated_data)
         return inmueblePorUsuario_instance
  

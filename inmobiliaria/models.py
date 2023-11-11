@@ -41,25 +41,25 @@ class TipoDeInmueble(models.Model):
         return self.nombre
     
 class Inmueble(models.Model):
-    nombre = models.CharField(max_length=50)
-    descripcion = models.CharField(max_length=100)
-    estrato = models.IntegerField()
-    cantidadDeHabitantes = models.IntegerField()
-    cantidadDeBaños = models.IntegerField()
-    cantidadDeParqueaderos = models.IntegerField()
-    piso = models.IntegerField()
-    antiguedad = models.IntegerField()
-    estado = models.CharField(max_length=50)
-    url = models.CharField(max_length=100)
-    areaPrivada = models.IntegerField()
-    areaConstruida = models.IntegerField()
-    precioAdministracion = models.IntegerField()
-    precio = models.IntegerField()
-    direccion = models.CharField(max_length=300)
-    sector = models.ForeignKey(Sector, on_delete=models.CASCADE)
-    ciudad = models.ForeignKey(Ciudad, on_delete=models.CASCADE)
-    tipoDeInmueble = models.ForeignKey(TipoDeInmueble, on_delete = models.CASCADE)
-    caracteristicas = models.ManyToManyField('Caracteristica', related_name='caracteristicas')
+    nombre = models.CharField(max_length=150)
+    descripcion = models.CharField(max_length=600,null=True)
+    estrato = models.IntegerField(null=True)
+    cantidadDeHabitaciones = models.IntegerField(null=True)
+    cantidadDeBaños = models.IntegerField(null=True)
+    cantidadDeParqueaderos = models.IntegerField(null=True)
+    piso = models.IntegerField(null=True)
+    antiguedad = models.IntegerField(null=True)
+    estado = models.CharField(max_length=250,null=True, blank=True)
+    url = models.CharField(max_length=200)
+    areaPrivada = models.IntegerField(null=True)
+    areaConstruida = models.IntegerField(null=True)
+    precioAdministracion = models.IntegerField(null=True)
+    precio = models.IntegerField(null=True)
+    direccion = models.CharField(max_length=300,null=True)
+    sector = models.ForeignKey(Sector, on_delete=models.CASCADE,null=True)
+    ciudad = models.ForeignKey(Ciudad, null=True, on_delete=models.CASCADE)   
+    tipoDeInmueble = models.ForeignKey(TipoDeInmueble, on_delete = models.CASCADE,null=True)
+    caracteristicas = models.ManyToManyField(Caracteristica, related_name='caracteristicas')
 
     def __str__(self):
         return self.nombre
@@ -69,7 +69,8 @@ class Usuario(models.Model):
     password = models.CharField(max_length = 255)
     nombre = models.CharField(max_length=255)
     apellido = models.CharField(max_length=255)
-    role = models.CharField(max_length=255)
+    nombreDeUsuario = models.CharField(max_length=255,unique=True)
+    role = models.CharField(max_length=255,null=True)
     edad = models.PositiveIntegerField()
 
     def __str__(self):
@@ -78,7 +79,7 @@ class Usuario(models.Model):
 class InmueblePorUsuario(models.Model):
     usuario = models.ForeignKey(Usuario, on_delete=models.CASCADE)
     inmueble = models.ForeignKey(Inmueble, on_delete=models.CASCADE)
-    clasificacion = models.FloatField()
+    clasificacion = models.FloatField(null=True)
     
     def __str__(self):
         return f'{self.usuario} - {self.inmueble}'
