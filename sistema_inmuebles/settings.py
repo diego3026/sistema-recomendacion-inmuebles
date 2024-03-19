@@ -115,10 +115,10 @@ WSGI_APPLICATION = 'sistema_inmuebles.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'arquitectura-db',
-        'USER': 'diego',
-        'PASSWORD': '1234',
-        'HOST': 'localhost',
+        'NAME': 'postgres',
+        'USER': 'gidsyc',
+        'PASSWORD': 'Semillero2024',
+        'HOST': 'inmuebles.postgres.database.azure.com',
         'PORT': '5432',
     }
 }

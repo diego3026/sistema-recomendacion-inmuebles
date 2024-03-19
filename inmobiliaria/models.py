@@ -1,7 +1,4 @@
 from django.db import models
-from django.contrib.auth.hashers import make_password
-from django.contrib.auth import get_user_model
-
 class Sector(models.Model):
     nombre = models.CharField(max_length=255)
 
@@ -17,9 +14,9 @@ class TipoDeCaracteristica(models.Model):
 class Caracteristica(models.Model):
     nombre = models.CharField(max_length=255)
     tipoDeCaracteristica = models.ForeignKey(TipoDeCaracteristica, on_delete=models.CASCADE)
-    
+
     def __str__(self):
-        return f"{self.nombre} - {self.idTipoCaracteristica.nombre}"
+        return f"{self.nombre} - {self.tipoDeCaracteristica.nombre}"
 
 class Pais(models.Model):
     nombre = models.CharField(max_length=255)
