@@ -80,35 +80,3 @@ class InmueblePorUsuario(models.Model):
     
     def __str__(self):
         return f'{self.usuario} - {self.inmueble}'
-    
-
-# class UsuarioManager(models.Manager):
-#     @classmethod
-#     def autenticar_usuario(cls, email, password):
-#         try:
-#             # Buscar un usuario por correo y contraseña en la base de datos
-#             usuario = get_user_model().objects.get(email=email, password=password)
-#             return usuario
-#         except get_user_model().DoesNotExist:
-#             return None
-    
-#     @classmethod
-#     def registrar_usuario(usuario_data):
-#         try:
-#             # Crea un nuevo objeto Usuario y guárdalo en la base de datos
-#             usuario = Usuario(
-#                 email=usuario_data['email'],
-#                 password=usuario_data['password'],
-#                 nombre=usuario_data['nombre'],
-#                 apellido=usuario_data['apellido'],
-#                 edad=usuario_data['edad'],
-#             )
-#             usuario.save()
-#             return usuario
-#         except Exception as e:
-#             # Manejar cualquier excepción que pueda ocurrir al guardar el usuario
-#             # Por ejemplo, manejar la excepción de violación de restricción única en el campo 'email'
-#             return None
-    
-
-    
