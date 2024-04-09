@@ -194,12 +194,12 @@ class TipoDeInmuebleViewSet(viewsets.ModelViewSet):
         self.perform_update(serializer)
         return Response(serializer.data)
 
+import logging
 
+logger = logging.getLogger(__name__)
 class InmuebleViewSet(viewsets.ModelViewSet):
     queryset = Inmueble.objects.all()
     serializer_class = InmuebleSerializer
-
-    # Agregar acción delete
     @action(detail=True, methods=['delete'],permission_classes=[IsSuperUser])
     def delete(self, request, *args, **kwargs):
         instance = self.get_object()

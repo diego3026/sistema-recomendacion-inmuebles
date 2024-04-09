@@ -1,59 +1,87 @@
 from django.contrib.auth.hashers import make_password
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
+from unidecode import unidecode
 
 
 class Sector(models.Model):
-    nombre = models.CharField(max_length=255)
+    nombre = models.CharField(max_length=255,unique=True)
+
+    def save(self, *args, **kwargs):
+        self.nombre = unidecode(self.nombre).lower()
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return self.nombre
 
 
 class TipoDeCaracteristica(models.Model):
-    nombre = models.CharField(max_length=255)
+    nombre = models.CharField(max_length=255,unique=True)
+
+    def save(self, *args, **kwargs):
+        self.nombre = unidecode(self.nombre).lower()
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return self.nombre
 
 
 class Caracteristica(models.Model):
-    nombre = models.CharField(max_length=255)
+    nombre = models.CharField(max_length=255,unique=True)
     tipoDeCaracteristica = models.ForeignKey(TipoDeCaracteristica, on_delete=models.CASCADE)
+
+    def save(self, *args, **kwargs):
+        self.nombre = unidecode(self.nombre).lower()
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"{self.nombre} - {self.idTipoCaracteristica.nombre}"
 
 
 class Pais(models.Model):
-    nombre = models.CharField(max_length=255)
+    nombre = models.CharField(max_length=255,unique=True)
 
     def __str__(self):
         return self.nombre
 
+    def save(self, *args, **kwargs):
+        self.nombre = unidecode(self.nombre).lower()
+        super().save(*args, **kwargs)
+
 
 class Departamento(models.Model):
-    nombre = models.CharField(max_length=255)
+    nombre = models.CharField(max_length=255,unique=True)
     pais = models.ForeignKey(Pais, on_delete=models.CASCADE)
+
+    def save(self, *args, **kwargs):
+        self.nombre = unidecode(self.nombre).lower()
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return self.nombre
 
 
 class Ciudad(models.Model):
-    nombre = models.CharField(max_length=255)
+    nombre = models.CharField(max_length=255,unique=True)
     departamento = models.ForeignKey(Departamento, on_delete=models.CASCADE)
+
+    def save(self, *args, **kwargs):
+        self.nombre = unidecode(self.nombre).lower()
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return self.nombre
 
 
 class TipoDeInmueble(models.Model):
-    nombre = models.CharField(max_length=255)
+    nombre = models.CharField(max_length=255, unique=True, null=True, blank=True)
 
     def __str__(self):
         return self.nombre
 
+    def save(self, *args, **kwargs):
+        self.nombre = unidecode(self.nombre).lower()
+        super().save(*args, **kwargs)
 
 class Inmueble(models.Model):
     nombre = models.CharField(max_length=150)
@@ -64,17 +92,17 @@ class Inmueble(models.Model):
     cantidadDeParqueaderos = models.CharField(max_length=200, null=True)
     piso = models.CharField(max_length=150, null=True)
     antiguedad = models.CharField(max_length=200, null=True)
-    precioM2 = models.FloatField(null=True)
+    precioM2 = models.CharField(max_length=200,null=True)
     url = models.CharField(max_length=200, unique=True)
     areaPrivada = models.CharField(max_length=200, null=True)
     areaConstruida = models.CharField(max_length=200, null=True)
-    precioAdministracion = models.IntegerField(null=True)
+    precioAdministracion = models.CharField(max_length=200,null=True)
     precio = models.FloatField(null=True)
     estado = models.CharField(max_length=200, null=True)
     direccion = models.CharField(max_length=300, null=True, blank=True)
     sector = models.ForeignKey(Sector, blank=True, on_delete=models.CASCADE, null=True)
     ciudad = models.ForeignKey(Ciudad, null=True, blank=True, on_delete=models.CASCADE)
-    tipoDeInmueble = models.ForeignKey(TipoDeInmueble, on_delete=models.CASCADE, null=True)
+    tipoDeInmueble = models.ForeignKey(TipoDeInmueble, on_delete=models.CASCADE,null=True, blank=True)
     caracteristicas = models.ManyToManyField(Caracteristica, related_name='caracteristicas', blank=True)
 
     def __str__(self):

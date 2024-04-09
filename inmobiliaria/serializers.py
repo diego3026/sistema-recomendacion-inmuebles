@@ -1,15 +1,24 @@
+from django.db import IntegrityError
+from django.utils.text import slugify
 from rest_framework import serializers
+from rest_framework.response import Response
+
 from .models import *
 
+class NormalizedCharField(serializers.CharField):
+    def to_internal_value(self, data):
+        return slugify(data)
 
 class PaisSerializer(serializers.ModelSerializer):
+    nombre = NormalizedCharField(max_length=255)
+
     class Meta:
         model = Pais
         fields = '__all__'
 
-
 class DepartamentoSerializer(serializers.ModelSerializer):
     pais = PaisSerializer()
+    nombre = NormalizedCharField(max_length=255)
 
     class Meta:
         model = Departamento
@@ -17,34 +26,41 @@ class DepartamentoSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         pais_data = validated_data.pop('pais')
-        pais_instance, _ = Pais.objects.get_or_create(**pais_data)
+        pais_name = pais_data['nombre']
+        pais_instance, _ = Pais.objects.get_or_create(nombre=pais_name)
         departamento_instance = Departamento.objects.create(pais=pais_instance, **validated_data)
         return departamento_instance
 
-
 class CiudadSerializer(serializers.ModelSerializer):
     departamento = DepartamentoSerializer()
+    nombre = NormalizedCharField(max_length=255)
 
     class Meta:
         model = Ciudad
         fields = '__all__'
 
     def create(self, validated_data):
-        departamento_data = validated_data.pop('departamento')
-        pais_data = departamento_data.pop('pais')
-        pais_instance, _ = Pais.objects.get_or_create(**pais_data)
-        departamento_instance, _ = Departamento.objects.get_or_create(pais=pais_instance, **departamento_data)
-        ciudad_instance = Ciudad.objects.create(departamento=departamento_instance, **validated_data)
-        return ciudad_instance
-
+        try:
+            departamento_data = validated_data.pop('departamento')
+            departamento_name = departamento_data['nombre']
+            pais_data = departamento_data.pop('pais')
+            pais_instance, _ = Pais.objects.get_or_create(**pais_data)
+            departamento_instance, _ = Departamento.objects.get_or_create(pais=pais_instance, nombre=departamento_name)
+            ciudad_instance = Ciudad.objects.create(departamento=departamento_instance, **validated_data)
+            return ciudad_instance
+        except IntegrityError:
+            raise serializers.ValidationError("Ya existe una ciudad con el mismo nombre.")
 
 class SectorSerializer(serializers.ModelSerializer):
+    nombre = NormalizedCharField(max_length=255)
+
     class Meta:
         model = Sector
         fields = '__all__'
 
-
 class TipoDeCaracteristicaSerializer(serializers.ModelSerializer):
+    nombre = NormalizedCharField(max_length=255)
+
     class Meta:
         model = TipoDeCaracteristica
         fields = '__all__'
@@ -66,6 +82,7 @@ class UsuarioRegisterSerializer(serializers.ModelSerializer):
 
 class CaracteristicaSerializer(serializers.ModelSerializer):
     tipoDeCaracteristica = TipoDeCaracteristicaSerializer()
+    nombre = NormalizedCharField(max_length=255)
 
     class Meta:
         model = Caracteristica
@@ -79,9 +96,12 @@ class CaracteristicaSerializer(serializers.ModelSerializer):
 
 
 class TipoDeInmuebleSerializer(serializers.ModelSerializer):
+    nombre = NormalizedCharField(max_length=255,allow_null=True)
+
     class Meta:
         model = TipoDeInmueble
         fields = '__all__'
+
 
 class InmuebleSerializer(serializers.ModelSerializer):
     sector = SectorSerializer()
@@ -100,17 +120,20 @@ class InmuebleSerializer(serializers.ModelSerializer):
         caracteristicas_data = validated_data.pop('caracteristicas')
 
         sector_instance, created = Sector.objects.get_or_create(**sector_data)
-        tipo_inmueble_instance, _ = TipoDeInmueble.objects.get_or_create(**tipo_inmueble_data)
+
+        tipo_inmueble_instance = None
+        if tipo_inmueble_data and tipo_inmueble_data.get('nombre') is not None:
+            tipo_inmueble_instance, _ = TipoDeInmueble.objects.get_or_create(**tipo_inmueble_data)
 
         ciudad_instance = None
 
         if ciudad_data:
             departamento_data = ciudad_data.pop('departamento', None)
+            departamento_name = departamento_data['nombre']
             pais_data = departamento_data.pop('pais', None)
-
             pais_instance, _ = Pais.objects.get_or_create(**pais_data) if pais_data else (None, None)
             departamento_instance, _ = Departamento.objects.get_or_create(pais=pais_instance,
-                                                                          **departamento_data) if departamento_data else (
+                                                                          nombre=departamento_name) if departamento_data else (
             None, None)
             ciudad_instance, _ = Ciudad.objects.get_or_create(departamento=departamento_instance, **ciudad_data)
 
