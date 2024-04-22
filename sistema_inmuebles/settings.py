@@ -45,7 +45,9 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.messages',
     'rest_framework',
+    'rest_framework_swagger',
     'rest_framework_simplejwt',
+    'drf_yasg',
     #app
     'inmobiliaria',
 ]

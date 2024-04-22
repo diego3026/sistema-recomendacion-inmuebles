@@ -1,10 +1,25 @@
 from django.urls import path, include
 from django.contrib import admin
+from rest_framework import permissions
 from rest_framework.routers import DefaultRouter
 from inmobiliaria.views import *
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
     TokenRefreshView,
+)
+from drf_yasg.views import get_schema_view
+from drf_yasg import openapi
+
+schema_view = get_schema_view(
+    openapi.Info(
+        title="Your API",
+        default_version='v1',
+        description="Your API description",
+        contact=openapi.Contact(email="diegoonate3026@gmail.com"),
+        license=openapi.License(name="Your License"),
+    ),
+    public=True,
+    permission_classes=(permissions.AllowAny,),
 )
 
 router = DefaultRouter()
@@ -20,6 +35,7 @@ router.register(r'inmueblesPorUsuario', InmueblePorUsuarioViewSet)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
     path('api/', include(router.urls)),
     path('api/login/', LoginAPIView.as_view(), name='login'),
     path('api/register/', RegisterAPIView.as_view(), name='register'),
