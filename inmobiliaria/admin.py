@@ -1,7 +1,7 @@
 from .models import *
 from django.contrib import admin
 
-admin.site.register(Usuario)
-admin.site.register(Ciudad)
-admin.site.register(Departamento)
-admin.site.register(Pais)
+admin.site.register(users.Usuario)
+admin.site.register(places.Ciudad)
+admin.site.register(places.Departamento)
+admin.site.register(places.Pais)
