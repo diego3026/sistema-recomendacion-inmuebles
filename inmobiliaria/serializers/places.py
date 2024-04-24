@@ -10,7 +10,15 @@ class PaisSerializer(serializers.ModelSerializer):
     class Meta:
         model = Pais
         fields = '__all__'
-
+        
+    def create(self, validated_data):
+        try:
+            pais_data = validated_data
+            pais_name = pais_data['nombre']
+            pais_instance = Pais.objects.create(nombre=pais_name)
+            return pais_instance
+        except IntegrityError:
+            raise serializers.ValidationError("Ya existe una pais con el mismo nombre.")
 
 class DepartamentoSerializer(serializers.ModelSerializer):
     pais = PaisSerializer()
@@ -21,11 +29,14 @@ class DepartamentoSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
     def create(self, validated_data):
-        pais_data = validated_data.pop('pais')
-        pais_name = pais_data['nombre']
-        pais_instance, _ = Pais.objects.get_or_create(nombre=pais_name)
-        departamento_instance = Departamento.objects.create(pais=pais_instance, **validated_data)
-        return departamento_instance
+        try:
+            pais_data = validated_data.pop('pais')
+            pais_name = pais_data['nombre']
+            pais_instance = Pais.objects.get_or_create(nombre=pais_name)
+            departamento_instance = Departamento.objects.create(pais=pais_instance, **validated_data)
+            return departamento_instance
+        except IntegrityError:
+            raise serializers.ValidationError("Ya existe un departamento con el mismo nombre.")
 
     def update(self, instance, validated_data):
         nuevo_nombre = validated_data.get('nombre', instance.nombre)
@@ -45,7 +56,6 @@ class DepartamentoSerializer(serializers.ModelSerializer):
 
         instance.save()
         return instance
-
 
 class CiudadSerializer(serializers.ModelSerializer):
     departamento = DepartamentoSerializer()
@@ -90,7 +100,6 @@ class CiudadSerializer(serializers.ModelSerializer):
         instance.save()
         return instance
 
-
 class SectorSerializer(serializers.ModelSerializer):
     nombre = NormalizedCharField(max_length=255)
 
@@ -98,3 +107,11 @@ class SectorSerializer(serializers.ModelSerializer):
         model = Sector
         fields = '__all__'
 
+    def create(self, validated_data):
+        try:
+            sector_data = validated_data
+            sector_name = sector_data['nombre']
+            sector_instance = Sector.objects.create(nombre=sector_name)
+            return sector_instance
+        except IntegrityError:
+            raise serializers.ValidationError("Ya existe una sector con el mismo nombre.")
