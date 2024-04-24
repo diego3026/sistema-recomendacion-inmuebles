@@ -31,6 +31,8 @@ class Inmueble(models.Model):
     precioAdministracion = models.CharField(max_length=200,null=True)
     precio = models.FloatField(null=True)
     estado = models.CharField(max_length=200, null=True)
+    comentarios = models.CharField(max_length=500,null=True)
+    clasificacion = models.IntegerField(null=True)
     direccion = models.CharField(max_length=300, null=True, blank=True)
     sector = models.ForeignKey(Sector, blank=True, on_delete=models.CASCADE, null=True)
     ciudad = models.ForeignKey(Ciudad, null=True, blank=True, on_delete=models.CASCADE)
@@ -44,6 +46,8 @@ class InmueblePorUsuario(models.Model):
     usuario = models.ForeignKey(Usuario, on_delete=models.CASCADE)
     inmueble = models.ForeignKey(Inmueble, on_delete=models.CASCADE)
     clasificacion = models.FloatField(null=True)
+    numeroDeClicks = models.BigIntegerField(null=True)
+    favorito = models.BooleanField(null=True)
 
     def __str__(self):
         return f'{self.usuario} - {self.inmueble}'
