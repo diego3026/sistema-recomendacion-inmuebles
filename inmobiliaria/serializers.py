@@ -17,6 +17,15 @@ class PaisSerializer(serializers.ModelSerializer):
     class Meta:
         model = Pais
         fields = '__all__'
+        
+    def create(self, validated_data):
+        try:
+            pais_data = validated_data
+            pais_name = pais_data['nombre']
+            pais_instance = Pais.objects.create(nombre=pais_name)
+            return pais_instance
+        except IntegrityError:
+            raise serializers.ValidationError("Ya existe una pais con el mismo nombre.")
 
 
 class DepartamentoSerializer(serializers.ModelSerializer):
@@ -28,11 +37,14 @@ class DepartamentoSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
     def create(self, validated_data):
-        pais_data = validated_data.pop('pais')
-        pais_name = pais_data['nombre']
-        pais_instance, _ = Pais.objects.get_or_create(nombre=pais_name)
-        departamento_instance = Departamento.objects.create(pais=pais_instance, **validated_data)
-        return departamento_instance
+        try:
+            pais_data = validated_data.pop('pais')
+            pais_name = pais_data['nombre']
+            pais_instance = Pais.objects.get_or_create(nombre=pais_name)
+            departamento_instance = Departamento.objects.create(pais=pais_instance, **validated_data)
+            return departamento_instance
+        except IntegrityError:
+            raise serializers.ValidationError("Ya existe un departamento con el mismo nombre.")
 
     def update(self, instance, validated_data):
         nuevo_nombre = validated_data.get('nombre', instance.nombre)
@@ -105,6 +117,14 @@ class SectorSerializer(serializers.ModelSerializer):
         model = Sector
         fields = '__all__'
 
+    def create(self, validated_data):
+        try:
+            sector_data = validated_data
+            sector_name = sector_data['nombre']
+            sector_instance = Sector.objects.create(nombre=sector_name)
+            return sector_instance
+        except IntegrityError:
+            raise serializers.ValidationError("Ya existe una sector con el mismo nombre.")
 
 class TipoDeCaracteristicaSerializer(serializers.ModelSerializer):
     nombre = NormalizedCharField(max_length=255)
@@ -113,7 +133,15 @@ class TipoDeCaracteristicaSerializer(serializers.ModelSerializer):
         model = TipoDeCaracteristica
         fields = '__all__'
 
-
+    def create(self, validated_data):
+        try:
+            tipoDeCaracteristica_data = validated_data
+            tipoDeCaracteristica_name = tipoDeCaracteristica_data['nombre']
+            tipoDeCaracteristica_instance = TipoDeCaracteristica.objects.create(nombre=tipoDeCaracteristica_name)
+            return tipoDeCaracteristica_instance
+        except IntegrityError:
+            raise serializers.ValidationError("Ya existe una tipo De Caracteristica con el mismo nombre.")
+        
 class UsuarioSerializer(serializers.ModelSerializer):
     class Meta:
         model = Usuario
@@ -143,7 +171,14 @@ class CaracteristicaSerializer(serializers.ModelSerializer):
         tipo_data = validated_data.pop('tipoDeCaracteristica')
         tipo_instance, _ = TipoDeCaracteristica.objects.get_or_create(**tipo_data)
         caracteristica_instance = Caracteristica.objects.create(tipoDeCaracteristica=tipo_instance, **validated_data)
-        return caracteristica_instance
+        try:
+            tipoDeCaracteristica_data = validated_data.pop('tipoDeCaracteristica')
+            tipoDeCaracteristica_name = tipoDeCaracteristica_data['nombre']
+            tipoDeCaracteristica_instance = TipoDeCaracteristica.objects.get_or_create(nombre=tipoDeCaracteristica_name)
+            caracteristica_instance = Caracteristica.objects.create(tipoDeCaracteristica=tipoDeCaracteristica_instance, **validated_data)
+            return caracteristica_instance
+        except IntegrityError:
+            raise serializers.ValidationError("Ya existe una caracteristica con el mismo nombre.")
 
     def update(self, instance, validated_data):
         nombre_nuevo = validated_data.get('nombre', instance.nombre)
@@ -168,6 +203,15 @@ class TipoDeInmuebleSerializer(serializers.ModelSerializer):
     class Meta:
         model = TipoDeInmueble
         fields = '__all__'
+     
+    def create(self, validated_data):
+        try:
+            tipoDeInmueble_data = validated_data
+            tipoDeInmueble_name = tipoDeInmueble_data['nombre']
+            tipoDeInmueble_instance = TipoDeInmueble.objects.create(nombre=tipoDeInmueble_name)
+            return tipoDeInmueble_instance
+        except IntegrityError:
+            raise serializers.ValidationError("Ya existe una tipo de inmueble con el mismo nombre.")
 
 
 class InmuebleSerializer(serializers.ModelSerializer):
@@ -233,23 +277,30 @@ class InmuebleSerializer(serializers.ModelSerializer):
         tipo_inmueble_data = validated_data.pop('tipoDeInmueble')
         caracteristicas_data = validated_data.pop('caracteristicas')
 
-        sector_instance, created = Sector.objects.get_or_create(**sector_data)
+        sector_instance, _ = Sector.objects.get_or_create(**sector_data)
 
-        tipo_inmueble_instance = None
-        if tipo_inmueble_data and tipo_inmueble_data.get('nombre') is not None:
-            tipo_inmueble_instance, _ = TipoDeInmueble.objects.get_or_create(**tipo_inmueble_data)
+        tipo_inmueble_instance, _ = TipoDeInmueble.objects.get_or_create(**tipo_inmueble_data)
 
         ciudad_instance = None
-
         if ciudad_data:
             departamento_data = ciudad_data.pop('departamento', None)
             departamento_name = departamento_data['nombre']
             pais_data = departamento_data.pop('pais', None)
-            pais_instance, _ = Pais.objects.get_or_create(**pais_data) if pais_data else (None, None)
-            departamento_instance, _ = Departamento.objects.get_or_create(pais=pais_instance,
-                                                                          nombre=departamento_name) if departamento_data else (
-                None, None)
-            ciudad_instance, _ = Ciudad.objects.get_or_create(departamento=departamento_instance, **ciudad_data)
+            if pais_data:
+                pais_instance, _ = Pais.objects.get_or_create(**pais_data)
+            else:
+                pais_instance = None
+            if departamento_data:
+                departamento_instance, _ = Departamento.objects.get_or_create(pais=pais_instance, nombre=departamento_name)
+            else:
+                departamento_instance = None
+
+            ciudad_name = slugify(ciudad_data['nombre'])
+            ciudad_name = ciudad_data['nombre']
+            try:
+                ciudad_instance = Ciudad.objects.get(nombre=ciudad_name)
+            except Ciudad.DoesNotExist:
+                ciudad_instance = Ciudad.objects.create(nombre=ciudad_name,departamento=departamento_instance)
 
         inmueble_instance = Inmueble.objects.create(
             sector=sector_instance,
@@ -261,14 +312,11 @@ class InmuebleSerializer(serializers.ModelSerializer):
         if caracteristicas_data:
             for caracteristica_data in caracteristicas_data:
                 tipoDeCaracteristica_data = caracteristica_data.pop('tipoDeCaracteristica')
-                tipoDeCaracteristica_instance, _ = TipoDeCaracteristica.objects.get_or_create(
-                    **tipoDeCaracteristica_data)
-                caracteristica_instance, _ = Caracteristica.objects.get_or_create(
-                    tipoDeCaracteristica=tipoDeCaracteristica_instance, **caracteristica_data)
+                tipoDeCaracteristica_instance, _ = TipoDeCaracteristica.objects.get_or_create(**tipoDeCaracteristica_data)
+                caracteristica_instance, _ = Caracteristica.objects.get_or_create(tipoDeCaracteristica=tipoDeCaracteristica_instance, **caracteristica_data)
                 inmueble_instance.caracteristicas.add(caracteristica_instance)
 
         return inmueble_instance
-
 
 class InmueblePorUsuarioSerializer(serializers.ModelSerializer):
     usuario = serializers.SlugRelatedField(slug_field='username', queryset=Usuario.objects.all())
