@@ -10,6 +10,16 @@ class TipoDeCaracteristicaSerializer(serializers.ModelSerializer):
         model = TipoDeCaracteristica
         fields = '__all__'
 
+    def create(self, validated_data):
+        try:
+            tipoDeCaracteristica_data = validated_data
+            tipoDeCaracteristica_name = tipoDeCaracteristica_data['nombre']
+            tipoDeCaracteristica_instance = TipoDeCaracteristica.objects.create(nombre=tipoDeCaracteristica_name)
+            return tipoDeCaracteristica_instance
+        except IntegrityError:
+            raise serializers.ValidationError("Ya existe una tipo De Caracteristica con el mismo nombre.")
+
+
 class CaracteristicaSerializer(serializers.ModelSerializer):
     tipoDeCaracteristica = TipoDeCaracteristicaSerializer()
     nombre = NormalizedCharField(max_length=255)
@@ -22,7 +32,14 @@ class CaracteristicaSerializer(serializers.ModelSerializer):
         tipo_data = validated_data.pop('tipoDeCaracteristica')
         tipo_instance, _ = TipoDeCaracteristica.objects.get_or_create(**tipo_data)
         caracteristica_instance = Caracteristica.objects.create(tipoDeCaracteristica=tipo_instance, **validated_data)
-        return caracteristica_instance
+        try:
+            tipoDeCaracteristica_data = validated_data.pop('tipoDeCaracteristica')
+            tipoDeCaracteristica_name = tipoDeCaracteristica_data['nombre']
+            tipoDeCaracteristica_instance = TipoDeCaracteristica.objects.get_or_create(nombre=tipoDeCaracteristica_name)
+            caracteristica_instance = Caracteristica.objects.create(tipoDeCaracteristica=tipoDeCaracteristica_instance, **validated_data)
+            return caracteristica_instance
+        except IntegrityError:
+            raise serializers.ValidationError("Ya existe una caracteristica con el mismo nombre.")
 
     def update(self, instance, validated_data):
         nombre_nuevo = validated_data.get('nombre', instance.nombre)
