@@ -97,10 +97,10 @@ WSGI_APPLICATION = 'sistema_inmuebles.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
-host = os.getenv('AZURE_POSTGRESQL_HOST')
-user = os.getenv('AZURE_POSTGRESQL_USER')
-password = os.getenv('AZURE_POSTGRESQL_PASSWORD')
-database = os.getenv('AZURE_POSTGRESQL_NAME')
+host = os.environ('AZURE_POSTGRESQL_HOST')
+user = os.environ('AZURE_POSTGRESQL_USER')
+password = os.environ('AZURE_POSTGRESQL_PASSWORD')
+database = os.environ('AZURE_POSTGRESQL_NAME')
 
 
 DATABASES = {
