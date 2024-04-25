@@ -21,10 +21,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = config('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = config('DEBUG',cast=bool)
 
-ALLOWED_HOSTS = ['dream-home.azurewebsites.net','127.0.0.1']
-CSRF_TRUSTED_ORIGINS = ['https://dream-home.azurewebsites.net']
 # Application definition
 
 INSTALLED_APPS = [
@@ -97,19 +95,13 @@ WSGI_APPLICATION = 'sistema_inmuebles.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
-host = os.environ('AZURE_POSTGRESQL_HOST')
-user = os.environ('AZURE_POSTGRESQL_USER')
-password = os.environ('AZURE_POSTGRESQL_PASSWORD')
-database = os.environ('AZURE_POSTGRESQL_NAME')
-
-
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': database,
-        'USER': user,
-        'PASSWORD': password,
-        'HOST': host,
+        'NAME': config('DB_NAME'),
+        'USER': config('DB_USER'),
+        'PASSWORD': config('DB_PASSWORD'),
+        'HOST': config('DB_HOST'),
         'PORT': '5432'
     }
 }
