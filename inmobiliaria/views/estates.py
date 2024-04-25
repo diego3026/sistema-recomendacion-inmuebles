@@ -41,7 +41,19 @@ class InmuebleViewSet(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
         return Response(serializer.data)
-
+    
+    permission_classes = [IsSuperUser]
+    def create(self, request, *args, **kwargs):
+        response = {'status': 'inmueble created'}
+        if isinstance(request.data, list):
+            serializer = self.get_serializer(data= request.data, many = True)
+            if len(request.data) > 1:
+                response = {'status': 'inmuebles created'} 
+        else:
+            serializer = self.get_serializer(data= request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+        return Response(response, status=status.HTTP_201_CREATED)
 
 class InmueblePorUsuarioViewSet(viewsets.ModelViewSet):
     queryset = InmueblePorUsuario.objects.all()
