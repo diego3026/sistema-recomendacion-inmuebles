@@ -97,13 +97,19 @@ WSGI_APPLICATION = 'sistema_inmuebles.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
+host = os.getenv('AZURE_POSTGRESQL_HOST')
+user = os.getenv('AZURE_POSTGRESQL_USER')
+password = os.getenv('AZURE_POSTGRESQL_PASSWORD')
+database = os.getenv('AZURE_POSTGRESQL_NAME')
+
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': config('DB_NAME'),
-        'USER': config('DB_USER'),
-        'PASSWORD': config('DB_PASSWORD'),
-        'HOST': config('DB_HOST'),
+        'NAME': database,
+        'USER': user,
+        'PASSWORD': password,
+        'HOST': host,
         'PORT': '5432'
     }
 }
