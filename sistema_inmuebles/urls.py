@@ -12,11 +12,10 @@ from drf_yasg import openapi # type: ignore
 
 schema_view = get_schema_view(
     openapi.Info(
-        title="Your API",
+        title="sistema de recomendacion de inmuebles API",
         default_version='v1',
-        description="Your API description",
         contact=openapi.Contact(email="diegoonate3026@gmail.com"),
-        license=openapi.License(name="Your License"),
+        license=openapi.License(name="GIDSYC"),
     ),
     public=True,
     permission_classes=(permissions.AllowAny,),
@@ -35,7 +34,7 @@ router.register(r'inmueblesPorUsuario', InmueblePorUsuarioViewSet)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('swagger', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
+    path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
     path('api/', include(router.urls)),
     path('api/login/', LoginAPIView.as_view(), name='login'),
     path('api/register/', RegisterAPIView.as_view(), name='register'),

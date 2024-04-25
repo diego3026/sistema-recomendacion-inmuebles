@@ -14,9 +14,6 @@ from pathlib import Path
 from datetime import timedelta
 from decouple import config
 
-
-DEBUG=config("DEBUG", cast=bool)
-
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -24,9 +21,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = config('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = config('DEBUG')
+DEBUG = False
 
-ALLOWED_HOSTS = ['https://dream-home.azurewebsites.net/','127.0.0.1']
+ALLOWED_HOSTS = ['dream-home.azurewebsites.net','127.0.0.1']
+CSRF_TRUSTED_ORIGINS = ['https://dream-home.azurewebsites.net']
 # Application definition
 
 INSTALLED_APPS = [
