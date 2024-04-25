@@ -9,27 +9,24 @@ https://docs.djangoproject.com/en/4.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
-import environ
 import os
 from pathlib import Path
 from datetime import timedelta
+from decouple import config
 
-env = environ.Env(
-    DEBUG=(bool, False)
-)
+
+DEBUG=config("DEBUG", cast=bool)
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-environ.Env.read_env(str(BASE_DIR / '.env'))
-
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = env('SECRET_KEY')
+SECRET_KEY = config('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = env('DEBUG')
+DEBUG = config('DEBUG')
 
-ALLOWED_HOSTS = ['https://dream-home.azurewebsites.net/','http://127.0.0.1:8000/']
+ALLOWED_HOSTS = ['https://dream-home.azurewebsites.net/','127.0.0.1']
 # Application definition
 
 INSTALLED_APPS = [
@@ -105,10 +102,10 @@ WSGI_APPLICATION = 'sistema_inmuebles.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'postgres',
-        'USER': env('USER'),
-        'PASSWORD': env('PASSWORD'),
-        'HOST': env('HOST'),
+        'NAME': config('DB_NAME'),
+        'USER': config('DB_USER'),
+        'PASSWORD': config('DB_PASSWORD'),
+        'HOST': config('DB_HOST'),
         'PORT': '5432'
     }
 }
