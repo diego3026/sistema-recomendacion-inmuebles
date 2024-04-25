@@ -29,11 +29,7 @@ SECRET_KEY = env('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env('DEBUG')
 
-ALLOWED_HOSTS = []
-
-MIDDLEWARE = [
-    'inmobiliaria.middleware.TokenRenewMiddleware',
-]
+CSRF_TRUSTED_ORIGINS = ['https://dream-home.azurewebsites.net/']
 
 # Application definition
 
@@ -71,6 +67,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'inmobiliaria.middleware.TokenRenewMiddleware',
 ]
 
 REST_FRAMEWORK = {
