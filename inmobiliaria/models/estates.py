@@ -24,6 +24,7 @@ class Inmueble(models.Model):
     cantidadDeParqueaderos = models.IntegerField(null=True)
     antiguedad = models.CharField(max_length=200, null=True)
     precioM2 = models.CharField(max_length=200,null=True)
+    valorArriendo = models.FloatField(null=True)
     url = models.CharField(max_length=200, unique=True)
     areaPrivada = models.CharField(max_length=200, null=True)
     areaConstruida = models.CharField(max_length=200, null=True)
