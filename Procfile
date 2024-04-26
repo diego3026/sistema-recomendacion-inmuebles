@@ -1,0 +1,1 @@
+web gunicorn sistema_inmuebles.wsgi:aplication --log-file -
