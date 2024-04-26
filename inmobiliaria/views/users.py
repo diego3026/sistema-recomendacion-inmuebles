@@ -17,7 +17,6 @@ class UsuarioViewSet(viewsets.ModelViewSet):
         self.perform_destroy(instance)
         return Response({'status': 'usuario deleted'}, status=status.HTTP_204_NO_CONTENT)
 
-    permission_classes = [IsSuperUser]
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
         serializer = self.get_serializer(instance, data=request.data)

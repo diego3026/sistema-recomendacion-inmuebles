@@ -43,6 +43,8 @@ class InmuebleSerializer(serializers.ModelSerializer):
 
         instance.nombre = validated_data.get('nombre', instance.nombre)
         instance.descripcion = validated_data.get('descripcion', instance.descripcion)
+        instance.calificacion = validated_data.get('calificacion',instance.calificacion)
+        instance.comentarios = validated_data.get('comentarios',instance.comentarios)
 
         sector_data = validated_data.get('sector')
         if sector_data:
@@ -143,8 +145,9 @@ class InmueblePorUsuarioSerializer(serializers.ModelSerializer):
         return inmueblePorUsuario_instance
 
     def update(self, instance, validated_data):
-        instance.fecha = validated_data.get('fecha', instance.fecha)
-        instance.comentario = validated_data.get('comentario', instance.comentario)
+        instance.clasificacion = validated_data.get('clasificacion', instance.clasificacion)
+        instance.numeroDeClicks = validated_data.get('numeroDeClicks', instance.numeroDeClicks)
+        instance.favorito = validated_data.get('favorito',instance.favorito)
 
         usuario_data = validated_data.get('usuario')
         if usuario_data:

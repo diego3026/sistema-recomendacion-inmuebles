@@ -1,5 +1,5 @@
+from django.db import IntegrityError
 from rest_framework import serializers
-
 from .normalized_char import *
 from inmobiliaria.models import *
 
