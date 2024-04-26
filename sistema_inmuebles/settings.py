@@ -23,8 +23,9 @@ SECRET_KEY = config('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-# Application definition
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
+# Application definition
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
