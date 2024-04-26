@@ -31,8 +31,8 @@ router.register(r'caracteristicas', CaracteristicaViewSet)
 router.register(r'tiposDeInmuebles', TipoDeInmuebleViewSet)
 router.register(r'inmuebles', InmuebleViewSet)
 router.register(r'inmueblesPorUsuario', InmueblePorUsuarioViewSet)
-router.register(r'interes', Interes)
-router.register(r'interesPorUsuario', InteresPorUsuario)
+router.register(r'interes', InteresViewSet)
+router.register(r'interesPorUsuario', InteresPorUsuarioViewSet)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
