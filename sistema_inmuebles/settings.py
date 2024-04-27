@@ -98,7 +98,7 @@ TEMPLATES = [
     },
 ]
 
-#WSGI_APPLICATION = 'sistema_inmuebles.wsgi.application'
+WSGI_APPLICATION = 'sistema_inmuebles.wsgi.application'
 
 
 # Database
