@@ -1,9 +1,8 @@
 from django.db import models
 from unidecode import unidecode
-
+from .users import Usuario
 from .places import *
 from .features import *
-from .users import *
 
 class TipoDeInmueble(models.Model):
     nombre = models.CharField(max_length=255, unique=True, null=True, blank=True)
@@ -51,4 +50,3 @@ class InmueblePorUsuario(models.Model):
 
     def __str__(self):
         return f'{self.usuario} - {self.inmueble}'
-
