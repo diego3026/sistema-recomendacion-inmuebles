@@ -1,7 +1,7 @@
 from django.db import IntegrityError
 from .normalized_char import *
 from inmobiliaria.models import *
-from .normalized_char import custom_slugify,NormalizedCharField
+from .normalized_char import NormalizedCharField
 from .users import *
 
 class InteresSerializer(serializers.ModelSerializer):
@@ -13,7 +13,7 @@ class InteresSerializer(serializers.ModelSerializer):
 
 class InteresPorUsuarioSerializer(serializers.ModelSerializer):
     interes = NormalizedCharField(max_length=255)
-
+    usuario = serializers.CharField(max_length=255)
     class Meta:
         model = InteresPorUsuario
         fields = '__all__'

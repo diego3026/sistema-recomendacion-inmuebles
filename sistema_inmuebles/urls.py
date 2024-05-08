@@ -36,7 +36,7 @@ router.register(r'interesesPorUsuario', InteresPorUsuarioViewSet)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
+    path('docs/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
     path('api/', include(router.urls)),
     path('api/login/', LoginAPIView.as_view(), name='login'),
     path('api/register/', RegisterAPIView.as_view(), name='register'),

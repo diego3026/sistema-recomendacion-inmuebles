@@ -44,7 +44,6 @@ class InteresPorUsuarioViewSet(viewsets.ModelViewSet):
         instance = self.get_object()
         self.perform_destroy(instance)
         return Response({'status': 'interes por usuario deleted'}, status=status.HTTP_204_NO_CONTENT)
-    
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
         serializer = self.get_serializer(instance, data=request.data)
@@ -59,7 +58,7 @@ class InteresPorUsuarioViewSet(viewsets.ModelViewSet):
         usuario_data = serializer.validated_data['usuario']
         interes_data = serializer.validated_data['interes']
 
-        usuario_instance, _ = Usuario.objects.get_or_create(username=usuario_data)
+        usuario_instance = Usuario.objects.get(username=usuario_data)
         interes_instance, _ = Interes.objects.get_or_create(nombre=interes_data)
 
         try:
