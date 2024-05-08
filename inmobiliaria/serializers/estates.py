@@ -1,10 +1,8 @@
-from rest_framework import serializers
-
-from .normalized_char import *
 from .places import *
 from .features import *
 from inmobiliaria.models import *
-
+from .normalized_char import *
+import pdb;
 
 class TipoDeInmuebleSerializer(serializers.ModelSerializer):
     nombre = NormalizedCharField(max_length=255, allow_null=True)
@@ -12,15 +10,6 @@ class TipoDeInmuebleSerializer(serializers.ModelSerializer):
     class Meta:
         model = TipoDeInmueble
         fields = '__all__'
-     
-    def create(self, validated_data):
-        try:
-            tipoDeInmueble_data = validated_data
-            tipoDeInmueble_name = tipoDeInmueble_data['nombre']
-            tipoDeInmueble_instance = TipoDeInmueble.objects.create(nombre=tipoDeInmueble_name)
-            return tipoDeInmueble_instance
-        except IntegrityError:
-            raise serializers.ValidationError("Ya existe una tipo de inmueble con el mismo nombre.")
 
 class InmuebleSerializer(serializers.ModelSerializer):
     sector = SectorSerializer()
@@ -31,6 +20,66 @@ class InmuebleSerializer(serializers.ModelSerializer):
     class Meta:
         model = Inmueble
         fields = '__all__'
+
+    def create(self, validated_data):
+        sector_data = validated_data.pop('sector')
+        ciudad_data = validated_data.pop('ciudad', None)
+        tipo_inmueble_data = validated_data.pop('tipoDeInmueble')
+        caracteristicas_data = validated_data.pop('caracteristicas')
+
+        sector_instance, _ = Sector.objects.get_or_create(**sector_data)
+
+        tipo_inmueble_instance, _ = TipoDeInmueble.objects.get_or_create(**tipo_inmueble_data)
+
+        ciudad_instance = None
+        if ciudad_data:
+            ciudad_name = ciudad_data['nombre']
+            try:
+                ciudad_instance = Ciudad.objects.get(nombre=ciudad_name)
+            except Ciudad.DoesNotExist:
+                departamento_data = ciudad_data.pop('departamento', None)
+                departamento_name = departamento_data['nombre']
+                pais_data = departamento_data.pop('pais', None)
+                if pais_data:
+                    pais_instance, _ = Pais.objects.get_or_create(**pais_data)
+                else:
+                    pais_instance = None
+                if departamento_data:
+                    departamento_instance, _ = Departamento.objects.get_or_create(pais=pais_instance, nombre=departamento_name)
+                else:
+                    departamento_instance = None
+
+                ciudad_instance = Ciudad.objects.create(nombre=ciudad_name, departamento=departamento_instance)
+
+
+
+        inmueble_instance = Inmueble.objects.create(
+            sector=sector_instance,
+            ciudad=ciudad_instance,
+            tipoDeInmueble=tipo_inmueble_instance,
+            **validated_data
+        )
+
+
+        if caracteristicas_data:
+            for caracteristica_data in caracteristicas_data:
+                tipoDeCaracteristica_data = caracteristica_data.get('tipoDeCaracteristica')
+                try:
+                    tipoDeCaracteristica_instance = TipoDeCaracteristica.objects.get(nombre=tipoDeCaracteristica_data['nombre'])
+                except TipoDeCaracteristica.DoesNotExist:
+                    tipoDeCaracteristica_instance = TipoDeCaracteristica.objects.create(nombre=tipoDeCaracteristica_data['nombre'])
+
+                try:
+                    caracteristica_instance = Caracteristica.objects.get(nombre=caracteristica_data['nombre'])
+                except Caracteristica.DoesNotExist:
+                    caracteristica_instance = Caracteristica.objects.create(nombre=caracteristica_data['nombre'],tipoDeCaracteristica=tipoDeCaracteristica_instance)
+
+                inmueble_instance.caracteristicas.add(caracteristica_instance)
+
+        inmueble_instance.save()
+
+        return inmueble_instance
+
 
     def update(self, instance, validated_data):
         url_nuevo = validated_data.get('url', instance.nombre)
@@ -81,82 +130,27 @@ class InmuebleSerializer(serializers.ModelSerializer):
         instance.save()
         return instance
 
-    def create(self, validated_data):
-        sector_data = validated_data.pop('sector')
-        ciudad_data = validated_data.pop('ciudad', None)
-        tipo_inmueble_data = validated_data.pop('tipoDeInmueble')
-        caracteristicas_data = validated_data.pop('caracteristicas')
-
-        sector_instance, _ = Sector.objects.get_or_create(**sector_data)
-
-        tipo_inmueble_instance, _ = TipoDeInmueble.objects.get_or_create(**tipo_inmueble_data)
-
-        ciudad_instance = None
-        if ciudad_data:
-            departamento_data = ciudad_data.pop('departamento', None)
-            departamento_name = departamento_data['nombre']
-            pais_data = departamento_data.pop('pais', None)
-            if pais_data:
-                pais_instance, _ = Pais.objects.get_or_create(**pais_data)
-            else:
-                pais_instance = None
-            if departamento_data:
-                departamento_instance, _ = Departamento.objects.get_or_create(pais=pais_instance, nombre=departamento_name)
-            else:
-                departamento_instance = None
-
-            ciudad_name = slugify(ciudad_data['nombre'])
-            ciudad_name = ciudad_data['nombre']
-            try:
-                ciudad_instance = Ciudad.objects.get(nombre=ciudad_name)
-            except Ciudad.DoesNotExist:
-                ciudad_instance = Ciudad.objects.create(nombre=ciudad_name,departamento=departamento_instance)
-
-        inmueble_instance = Inmueble.objects.create(
-            sector=sector_instance,
-            ciudad=ciudad_instance,
-            tipoDeInmueble=tipo_inmueble_instance,
-            **validated_data
-        )
-
-        if caracteristicas_data:
-            for caracteristica_data in caracteristicas_data:
-                tipoDeCaracteristica_data = caracteristica_data.pop('tipoDeCaracteristica')
-                tipoDeCaracteristica_instance, _ = TipoDeCaracteristica.objects.get_or_create(**tipoDeCaracteristica_data)
-                caracteristica_instance, _ = Caracteristica.objects.get_or_create(tipoDeCaracteristica=tipoDeCaracteristica_instance, **caracteristica_data)
-                inmueble_instance.caracteristicas.add(caracteristica_instance)
-
-        return inmueble_instance
-
 class InmueblePorUsuarioSerializer(serializers.ModelSerializer):
-    usuario = serializers.SlugRelatedField(slug_field='username', queryset=Usuario.objects.all())
-    inmueble = serializers.SlugRelatedField(slug_field='url', queryset=Inmueble.objects.all())
+    inmueble = serializers.CharField(max_length=300)
+    usuario = serializers.CharField(max_length=500)
 
     class Meta:
         model = InmueblePorUsuario
         fields = '__all__'
-
-    def create(self, validated_data):
-        usuario_data = validated_data.pop('usuario')
-        inmueble_data = validated_data.pop('inmueble')
-
-        inmueblePorUsuario_instance = InmueblePorUsuario.objects.create(usuario=usuario_data, inmueble=inmueble_data,
-                                                                        **validated_data)
-        return inmueblePorUsuario_instance
 
     def update(self, instance, validated_data):
         instance.clasificacion = validated_data.get('clasificacion', instance.clasificacion)
         instance.numeroDeClicks = validated_data.get('numeroDeClicks', instance.numeroDeClicks)
         instance.favorito = validated_data.get('favorito',instance.favorito)
 
-        usuario_data = validated_data.get('usuario')
+        usuario_data = validated_data.get('usuario',instance.usuario)
         if usuario_data:
-            usuario_instance = Usuario.objects.get(username=usuario_data.get('username'))
+            usuario_instance = Usuario.objects.get(username=usuario_data)
             instance.usuario = usuario_instance
 
-        inmueble_data = validated_data.get('inmueble')
+        inmueble_data = validated_data.get('inmueble',instance.inmueble)
         if inmueble_data:
-            inmueble_instance = Inmueble.objects.get(url=inmueble_data.get('url'))
+            inmueble_instance = Inmueble.objects.get(url=inmueble_data)
             instance.inmueble = inmueble_instance
 
         instance.save()
