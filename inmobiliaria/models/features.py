@@ -11,7 +11,6 @@ class TipoDeCaracteristica(models.Model):
     def __str__(self):
         return self.nombre
 
-
 class Caracteristica(models.Model):
     nombre = models.CharField(max_length=255,unique=True)
     tipoDeCaracteristica = models.ForeignKey(TipoDeCaracteristica, on_delete=models.CASCADE)

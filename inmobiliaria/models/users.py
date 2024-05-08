@@ -1,7 +1,7 @@
 from django.contrib.auth.hashers import make_password
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
-from unidecode import unidecode
+from .interests import Interes
 
 class UsuarioManager(BaseUserManager):
     def create_user(self, email, nombre, apellido, username, edad, password=None):
@@ -27,6 +27,7 @@ class Usuario(AbstractBaseUser, PermissionsMixin):
     apellido = models.CharField(max_length=255)
     username = models.CharField(max_length=200, unique=True)
     edad = models.PositiveIntegerField()
+    intereses = models.ManyToManyField(Interes, related_name='intereses', blank=True)
 
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
@@ -38,3 +39,10 @@ class Usuario(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return f"{self.nombre} {self.apellido}"
+
+class InteresPorUsuario(models.Model):
+    usuario = models.ForeignKey(Usuario, on_delete=models.CASCADE)
+    interes = models.ForeignKey(Interes, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f'{self.usuario} - {self.interes}'
