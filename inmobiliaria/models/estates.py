@@ -1,9 +1,8 @@
 from django.db import models
 from unidecode import unidecode
-
+from .users import Usuario
 from .places import *
 from .features import *
-from .users import *
 
 class TipoDeInmueble(models.Model):
     nombre = models.CharField(max_length=255, unique=True, null=True, blank=True)
@@ -18,7 +17,7 @@ class TipoDeInmueble(models.Model):
 class Inmueble(models.Model):
     nombre = models.CharField(max_length=150)
     descripcion = models.CharField(max_length=600, null=True)
-    estrato = models.CharField(max_length=200, null=True)
+    estrato = models.IntegerField(null=True)
     cantidadDeHabitaciones = models.IntegerField(null=True)
     cantidadDeBaños = models.IntegerField(null=True)
     cantidadDeParqueaderos = models.IntegerField(null=True)
@@ -28,7 +27,7 @@ class Inmueble(models.Model):
     url = models.CharField(max_length=200, unique=True)
     areaPrivada = models.CharField(max_length=200, null=True)
     areaConstruida = models.CharField(max_length=200, null=True)
-    precioAdministracion = models.CharField(max_length=200,null=True)
+    precioAdministracion = models.FloatField(null=True)
     precio = models.FloatField(null=True)
     estado = models.CharField(max_length=200, null=True)
     comentarios = models.CharField(max_length=500,null=True)
@@ -51,4 +50,3 @@ class InmueblePorUsuario(models.Model):
 
     def __str__(self):
         return f'{self.usuario} - {self.inmueble}'
-

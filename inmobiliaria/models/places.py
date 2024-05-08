@@ -23,7 +23,7 @@ class Pais(models.Model):
 
 
 class Departamento(models.Model):
-    nombre = models.CharField(max_length=255,unique=True)
+    nombre = models.CharField(max_length=255,null=True,blank=True,unique=True)
     pais = models.ForeignKey(Pais, on_delete=models.CASCADE)
 
     def save(self, *args, **kwargs):
@@ -35,8 +35,8 @@ class Departamento(models.Model):
 
 
 class Ciudad(models.Model):
-    nombre = models.CharField(max_length=255,unique=True)
-    departamento = models.ForeignKey(Departamento, on_delete=models.CASCADE)
+    nombre = models.CharField(max_length=255,null=True,blank=True,unique=True)
+    departamento = models.ForeignKey(Departamento,on_delete=models.CASCADE)
 
     def save(self, *args, **kwargs):
         self.nombre = unidecode(self.nombre).lower()
