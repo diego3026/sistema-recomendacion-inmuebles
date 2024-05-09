@@ -82,7 +82,7 @@ class SectorViewSet(viewsets.ModelViewSet):
         instance = self.get_object()
         self.perform_destroy(instance)
         return Response({'status': 'sector deleted'}, status=status.HTTP_204_NO_CONTENT)
-    
+
     permission_classes = [IsSuperUser]
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -95,10 +95,14 @@ class SectorViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         sector_data = serializer.validated_data['nombre']
+
+        if sector_data is None:
+            sector_instance = None
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
         try:
             sector_instance = Sector.objects.create(nombre=sector_data)
         except IntegrityError:
             return Response({"Ya existe un sector con este nombre"}, status=status.HTTP_302_FOUND)
 
         return Response(serializer.data, status=status.HTTP_201_CREATED)
-
