@@ -16,7 +16,7 @@ class TipoDeInmueble(models.Model):
 
 class Inmueble(models.Model):
     nombre = models.CharField(max_length=150)
-    descripcion = models.CharField(max_length=600, null=True)
+    descripcion = models.CharField(max_length=600, null=True,blank=True)
     estrato = models.IntegerField(null=True)
     cantidadDeHabitaciones = models.IntegerField(null=True)
     cantidadDeBaños = models.IntegerField(null=True)
