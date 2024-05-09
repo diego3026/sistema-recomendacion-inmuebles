@@ -25,7 +25,16 @@ class RegisterAPIView(APIView):
             )
             if user:
                 refresh = RefreshToken.for_user(user)
+                user_data = {
+                        'id': user.id,
+                        'username': user.username,
+                        'email': user.email,
+                        'nombre': user.nombre,
+                        'apellido': user.apellido,
+                        'edad': user.edad,
+                    }
                 return Response({
+                    'user':user_data,
                     'refresh': str(refresh),
                     'access': str(refresh.access_token),
                 }, status=status.HTTP_201_CREATED)
@@ -45,7 +54,16 @@ class LoginAPIView(APIView):
                 user = Usuario.objects.get(username=username)
                 if user.check_password(password):
                     refresh = RefreshToken.for_user(user)
+                    user_data = {
+                        'id': user.id,
+                        'username': user.username,
+                        'email': user.email,
+                        'nombre': user.nombre,
+                        'apellido': user.apellido,
+                        'edad': user.edad,
+                    }
                     return Response({
+                        'user': user_data,
                         'refresh': str(refresh),
                         'access': str(refresh.access_token),
                     }, status=status.HTTP_200_OK)
