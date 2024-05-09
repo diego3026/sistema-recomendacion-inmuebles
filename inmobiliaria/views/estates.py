@@ -58,12 +58,30 @@ class InmuebleViewSet(viewsets.ModelViewSet):
     permission_classes = [IsSuperUser]
     def create(self, request, *args, **kwargs):
         if isinstance(request.data, list):
-            serializer = self.get_serializer(data=request.data,many=True)
+            #serializer = self.get_serializer(data=request.data,many=True)
+            serialized_data = []
+            errors = []#2095
+            for data in request.data:
+                serializer = self.get_serializer(data=data)
+                if serializer.is_valid():
+                    try:
+                        instance = serializer.create(serializer.data)
+                        serialized_data.append(instance)
+                    except ValidationError as e:
+                        errors.append({'error': str(e), 'data': data})
+                else:
+                    errors.append({'error': serializer.errors, 'data': data})
+
+            if errors:
+                return Response(errors, status=status.HTTP_400_BAD_REQUEST)
+
+            return Response(serialized_data, status=status.HTTP_200_OK)
+
         else:
             serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.create(serializer.data)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+            serializer.is_valid(raise_exception=True)
+            serializer.create(serializer.data)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 class InmueblePorUsuarioViewSet(viewsets.ModelViewSet):
     queryset = InmueblePorUsuario.objects.all()
