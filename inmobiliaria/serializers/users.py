@@ -5,7 +5,7 @@ from inmobiliaria.models import *
 class UsuarioSerializer(serializers.ModelSerializer):
     class Meta:
         model = Usuario
-        fields = ['id', 'nombre', 'apellido', 'username', 'email', 'edad']
+        fields = ['id', 'nombre', 'apellido', 'username', 'email', 'edad', 'intereses']
 
 
 class UsuarioLoginSerializer(serializers.Serializer):
@@ -15,5 +15,5 @@ class UsuarioLoginSerializer(serializers.Serializer):
 class UsuarioRegisterSerializer(serializers.ModelSerializer):
     class Meta:
         model = Usuario
-        fields = ['email', 'password', 'nombre', 'apellido', 'username', 'edad']
+        fields = ['email', 'password', 'nombre', 'apellido', 'username', 'edad', 'intereses']
 
