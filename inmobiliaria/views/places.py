@@ -1,5 +1,6 @@
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from inmobiliaria.permissions import IsSuperUser
@@ -10,14 +11,18 @@ class PaisViewSet(viewsets.ModelViewSet):
     queryset = Pais.objects.all()
     serializer_class = PaisSerializer
 
+    permission_classes = [IsAuthenticated]
+    def get(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+
     @action(detail=True, methods=['delete'],permission_classes=[IsSuperUser])
     def delete(self, request, *args, **kwargs):
         instance = self.get_object()
         self.perform_destroy(instance)
         return Response(data={'status': 'pais deleted'}, status=status.HTTP_204_NO_CONTENT)
 
-    permission_classes = [IsSuperUser]
     def update(self, request, *args, **kwargs):
+        permission_classes = [IsSuperUser]
         instance = self.get_object()
         serializer = self.get_serializer(instance, data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -39,14 +44,18 @@ class CiudadViewSet(viewsets.ModelViewSet):
     queryset = Ciudad.objects.all()
     serializer_class = CiudadSerializer
 
+    permission_classes = [IsAuthenticated]
+    def get(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+
     @action(detail=True, methods=['delete'],permission_classes=[IsSuperUser])
     def delete(self, request, *args, **kwargs):
         instance = self.get_object()
         self.perform_destroy(instance)
         return Response({'status': 'ciudad deleted'}, status=status.HTTP_204_NO_CONTENT)
-    
-    permission_classes = [IsSuperUser]
+
     def update(self, request, *args, **kwargs):
+        permission_classes = [IsSuperUser]
         instance = self.get_object()
         serializer = self.get_serializer(instance, data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -77,14 +86,18 @@ class SectorViewSet(viewsets.ModelViewSet):
     queryset = Sector.objects.all()
     serializer_class = SectorSerializer
 
+    permission_classes = [IsAuthenticated]
+    def get(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+
     @action(detail=True, methods=['delete'],permission_classes=[IsSuperUser])
     def delete(self, request, *args, **kwargs):
         instance = self.get_object()
         self.perform_destroy(instance)
         return Response({'status': 'sector deleted'}, status=status.HTTP_204_NO_CONTENT)
 
-    permission_classes = [IsSuperUser]
     def update(self, request, *args, **kwargs):
+        permission_classes = [IsSuperUser]
         instance = self.get_object()
         serializer = self.get_serializer(instance, data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -104,5 +117,7 @@ class SectorViewSet(viewsets.ModelViewSet):
             sector_instance = Sector.objects.create(nombre=sector_data)
         except IntegrityError:
             return Response({"Ya existe un sector con este nombre"}, status=status.HTTP_302_FOUND)
+
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
         return Response(serializer.data, status=status.HTTP_201_CREATED)
