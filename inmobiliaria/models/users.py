@@ -27,7 +27,7 @@ class Usuario(AbstractBaseUser, PermissionsMixin):
     apellido = models.CharField(max_length=255)
     username = models.CharField(max_length=200, unique=True)
     edad = models.PositiveIntegerField()
-    intereses = models.ManyToManyField(Interes, related_name='intereses', blank=True)
+    intereses = models.ManyToManyField(Interes,related_name='intereses', blank=True, through='InteresPorUsuario')
 
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
