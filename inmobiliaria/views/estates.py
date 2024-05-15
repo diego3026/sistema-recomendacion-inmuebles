@@ -144,11 +144,8 @@ class InmueblePorUsuarioViewSet(viewsets.ModelViewSet):
         except IntegrityError:
             return Response({"Ya existe una usuario para este inmueble con este nombre"}, status=status.HTTP_302_FOUND)
 
-        inmueble_usuario_id = inmueble_usuario_instance.id
-
-        serializer = self.get_serializer(instance=inmueble_usuario_instance)
         serialized_data = serializer.data
 
-        serialized_data['id'] = inmueble_usuario_id
+        serialized_data['id'] = inmueble_usuario_instance.id
 
         return Response(serialized_data, status=status.HTTP_201_CREATED)
