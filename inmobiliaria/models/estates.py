@@ -50,3 +50,6 @@ class InmueblePorUsuario(models.Model):
 
     def __str__(self):
         return f'{self.usuario} - {self.inmueble}'
+
+    class Meta:
+        unique_together = [['usuario', 'inmueble']]
