@@ -137,6 +137,8 @@ class InmueblePorUsuarioSerializer(serializers.ModelSerializer):
         instance.clasificacion = validated_data.get('clasificacion', instance.clasificacion)
         instance.numeroDeClicks = validated_data.get('numeroDeClicks', instance.numeroDeClicks)
         instance.favorito = validated_data.get('favorito',instance.favorito)
+        instance.comentarios = validated_data.get('comentarios',instance.comentarios)
+        instance.calificacion = validated_data.get('calificacion',instance.calificacion)
 
         usuario_data = validated_data.get('usuario',instance.usuario)
         if usuario_data:
