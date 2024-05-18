@@ -4,7 +4,6 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
-
 from inmobiliaria.serializers import *
 from inmobiliaria.models import *
 
@@ -25,7 +24,19 @@ class RegisterAPIView(APIView):
             )
             if user:
                 refresh = RefreshToken.for_user(user)
+                intereses_serializer = InteresSerializer(user.intereses.all(), many=True)
+
+                user_data = {
+                    'id': user.id,
+                    'username': user.username,
+                    'email': user.email,
+                    'nombre': user.nombre,
+                    'apellido': user.apellido,
+                    'edad': user.edad,
+                    'intereses': intereses_serializer.data
+                }
                 return Response({
+                    'user': user_data,
                     'refresh': str(refresh),
                     'access': str(refresh.access_token),
                 }, status=status.HTTP_201_CREATED)
@@ -43,9 +54,20 @@ class LoginAPIView(APIView):
             password = serializer.validated_data['password']
             try:
                 user = Usuario.objects.get(username=username)
+                intereses_serializer = InteresSerializer(user.intereses.all(), many=True)
                 if user.check_password(password):
                     refresh = RefreshToken.for_user(user)
+                    user_data = {
+                        'id': user.id,
+                        'username': user.username,
+                        'email': user.email,
+                        'nombre': user.nombre,
+                        'apellido': user.apellido,
+                        'edad': user.edad,
+                        'intereses':intereses_serializer.data
+                    }
                     return Response({
+                        'user': user_data,
                         'refresh': str(refresh),
                         'access': str(refresh.access_token),
                     }, status=status.HTTP_200_OK)

@@ -15,7 +15,7 @@ class InmuebleSerializer(serializers.ModelSerializer):
     sector = SectorSerializer()
     ciudad = CiudadSerializer()
     tipoDeInmueble = TipoDeInmuebleSerializer()
-    caracteristicas = CaracteristicaSerializer(many=True)
+    caracteristicas = CaracteristicaSerializer(many=True, required=False)
 
     class Meta:
         model = Inmueble
@@ -25,9 +25,10 @@ class InmuebleSerializer(serializers.ModelSerializer):
         sector_data = validated_data.pop('sector')
         ciudad_data = validated_data.pop('ciudad', None)
         tipo_inmueble_data = validated_data.pop('tipoDeInmueble')
-        caracteristicas_data = validated_data.pop('caracteristicas')
+        caracteristicas_data = validated_data.pop('caracteristicas', None)  # Remove caracteristicas_data from validated_data
 
-        sector_instance, _ = Sector.objects.get_or_create(**sector_data)
+        if sector_data.get('nombre') is not None:
+            sector_instance, _ = Sector.objects.get_or_create(nombre=sector_data['nombre'])
 
         tipo_inmueble_instance, _ = TipoDeInmueble.objects.get_or_create(**tipo_inmueble_data)
 
@@ -51,15 +52,12 @@ class InmuebleSerializer(serializers.ModelSerializer):
 
                 ciudad_instance = Ciudad.objects.create(nombre=ciudad_name, departamento=departamento_instance)
 
-
-
         inmueble_instance = Inmueble.objects.create(
-            sector=sector_instance,
+            sector=sector_instance if sector_instance else None,
             ciudad=ciudad_instance,
             tipoDeInmueble=tipo_inmueble_instance,
             **validated_data
         )
-
 
         if caracteristicas_data:
             for caracteristica_data in caracteristicas_data:
@@ -72,14 +70,11 @@ class InmuebleSerializer(serializers.ModelSerializer):
                 try:
                     caracteristica_instance = Caracteristica.objects.get(nombre=caracteristica_data['nombre'])
                 except Caracteristica.DoesNotExist:
-                    caracteristica_instance = Caracteristica.objects.create(nombre=caracteristica_data['nombre'],tipoDeCaracteristica=tipoDeCaracteristica_instance)
+                    caracteristica_instance = Caracteristica.objects.create(nombre=caracteristica_data['nombre'], tipoDeCaracteristica=tipoDeCaracteristica_instance)
 
                 inmueble_instance.caracteristicas.add(caracteristica_instance)
 
-        inmueble_instance.save()
-
         return inmueble_instance
-
 
     def update(self, instance, validated_data):
         url_nuevo = validated_data.get('url', instance.nombre)
@@ -142,6 +137,8 @@ class InmueblePorUsuarioSerializer(serializers.ModelSerializer):
         instance.clasificacion = validated_data.get('clasificacion', instance.clasificacion)
         instance.numeroDeClicks = validated_data.get('numeroDeClicks', instance.numeroDeClicks)
         instance.favorito = validated_data.get('favorito',instance.favorito)
+        instance.comentarios = validated_data.get('comentarios',instance.comentarios)
+        instance.calificacion = validated_data.get('calificacion',instance.calificacion)
 
         usuario_data = validated_data.get('usuario',instance.usuario)
         if usuario_data:

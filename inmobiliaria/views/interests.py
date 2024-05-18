@@ -1,5 +1,6 @@
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from inmobiliaria.permissions import IsSuperUser
@@ -9,6 +10,10 @@ from inmobiliaria.models import *
 class InteresViewSet(viewsets.ModelViewSet):
     queryset = Interes.objects.all()
     serializer_class = InteresSerializer
+
+    permission_classes = [IsAuthenticated]
+    def get(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
 
     # Agregar acción delete
     @action(detail=True, methods=['delete'],permission_classes=[IsSuperUser])

@@ -1,5 +1,7 @@
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
+from rest_framework.exceptions import ValidationError
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from inmobiliaria.permissions import IsSuperUser
@@ -9,6 +11,10 @@ from inmobiliaria.models import *
 class TipoDeInmuebleViewSet(viewsets.ModelViewSet):
     queryset = TipoDeInmueble.objects.all()
     serializer_class = TipoDeInmuebleSerializer
+
+    permission_classes = [IsAuthenticated]
+    def get(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -30,8 +36,9 @@ class TipoDeInmuebleViewSet(viewsets.ModelViewSet):
         self.perform_destroy(instance)
         return Response({'status': 'tipo de inmueble deleted'}, status=status.HTTP_204_NO_CONTENT)
     
-    permission_classes = [IsSuperUser]
+
     def update(self, request, *args, **kwargs):
+        permission_classes = [IsSuperUser]
         instance = self.get_object()
         serializer = self.get_serializer(instance, data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -42,6 +49,10 @@ class InmuebleViewSet(viewsets.ModelViewSet):
     queryset = Inmueble.objects.all()
     serializer_class = InmuebleSerializer
 
+    permission_classes = [IsAuthenticated]
+    def get(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+
     @action(detail=True, methods=['delete'],permission_classes=[IsSuperUser])
     def delete(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -49,35 +60,59 @@ class InmuebleViewSet(viewsets.ModelViewSet):
         return Response({'status': 'inmueble deleted'}, status=status.HTTP_204_NO_CONTENT)
     
     def update(self, request, *args, **kwargs):
+        permission_classes = [IsSuperUser]
         instance = self.get_object()
         serializer = self.get_serializer(instance, data=request.data)
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
         return Response(serializer.data)
 
-    permission_classes = [IsSuperUser]
+
     def create(self, request, *args, **kwargs):
+        permission_classes = [IsSuperUser]
         if isinstance(request.data, list):
-            serializer = self.get_serializer(data=request.data,many=True)
+            #serializer = self.get_serializer(data=request.data,many=True)
+            serialized_data = []
+            errors = []#2095
+            for data in request.data:
+                serializer = self.get_serializer(data=data)
+                if serializer.is_valid():
+                    try:
+                        instance = serializer.create(serializer.data)
+                        serialized_data.append(instance)
+                    except ValidationError as e:
+                        errors.append({'error': str(e), 'data': data})
+                else:
+                    errors.append({'error': serializer.errors, 'data': data})
+
+            if errors:
+                return Response(errors, status=status.HTTP_400_BAD_REQUEST)
+
+            return Response(serialized_data, status=status.HTTP_200_OK)
+ 
         else:
             serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.create(serializer.data)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+            serializer.is_valid(raise_exception=True)
+            serializer.create(serializer.data)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 class InmueblePorUsuarioViewSet(viewsets.ModelViewSet):
     queryset = InmueblePorUsuario.objects.all()
     serializer_class = InmueblePorUsuarioSerializer
 
-    # Agregar acción delete
+    permission_classes = [IsAuthenticated]
+    def get(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+
     @action(detail=True, methods=['delete'],permission_classes=[IsSuperUser])
     def delete(self, request, *args, **kwargs):
         instance = self.get_object()
         self.perform_destroy(instance)
         return Response({'status': 'inmueble por usuario deleted'}, status=status.HTTP_204_NO_CONTENT)
     
-    permission_classes = [IsSuperUser]
+
     def update(self, request, *args, **kwargs):
+        permission_classes = [IsSuperUser]
         instance = self.get_object()
         serializer = self.get_serializer(instance, data=request.data)
         serializer.is_valid(raise_exception=True)

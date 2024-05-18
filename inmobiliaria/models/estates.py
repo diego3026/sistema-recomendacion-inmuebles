@@ -16,7 +16,7 @@ class TipoDeInmueble(models.Model):
 
 class Inmueble(models.Model):
     nombre = models.CharField(max_length=150)
-    descripcion = models.CharField(max_length=600, null=True)
+    descripcion = models.CharField(max_length=600, null=True,blank=True)
     estrato = models.IntegerField(null=True)
     cantidadDeHabitaciones = models.IntegerField(null=True)
     cantidadDeBaños = models.IntegerField(null=True)
@@ -30,8 +30,6 @@ class Inmueble(models.Model):
     precioAdministracion = models.FloatField(null=True)
     precio = models.FloatField(null=True)
     estado = models.CharField(max_length=200, null=True)
-    comentarios = models.CharField(max_length=500,null=True)
-    calificacion = models.IntegerField(null=True)
     direccion = models.CharField(max_length=300, null=True, blank=True)
     sector = models.ForeignKey(Sector, blank=True, on_delete=models.CASCADE, null=True)
     ciudad = models.ForeignKey(Ciudad, null=True, blank=True, on_delete=models.CASCADE)
@@ -47,6 +45,11 @@ class InmueblePorUsuario(models.Model):
     clasificacion = models.FloatField(null=True)
     numeroDeClicks = models.BigIntegerField(null=True)
     favorito = models.BooleanField(null=True)
+    comentarios = models.CharField(max_length=600,null=True)
+    calificacion = models.IntegerField(null=True)
 
     def __str__(self):
         return f'{self.usuario} - {self.inmueble}'
+
+    class Meta:
+        unique_together = [['usuario', 'inmueble']]

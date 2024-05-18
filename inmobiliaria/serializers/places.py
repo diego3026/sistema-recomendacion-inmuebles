@@ -51,7 +51,7 @@ class CiudadSerializer(serializers.ModelSerializer):
         return instance
 
 class SectorSerializer(serializers.ModelSerializer):
-    nombre = NormalizedCharField(max_length=255)
+    nombre = NormalizedCharField(max_length=255, allow_blank=True)
 
     class Meta:
         model = Sector

@@ -2,7 +2,7 @@ from django.db import models
 from unidecode import unidecode
 
 class Sector(models.Model):
-    nombre = models.CharField(max_length=255,unique=True)
+    nombre = models.CharField(max_length=255,blank=True,unique=True)
 
     def save(self, *args, **kwargs):
         self.nombre = unidecode(self.nombre).lower()
@@ -12,7 +12,7 @@ class Sector(models.Model):
         return self.nombre
     
 class Pais(models.Model):
-    nombre = models.CharField(max_length=255,unique=True)
+    nombre = models.CharField(max_length=255,unique=True,blank=True)
 
     def __str__(self):
         return self.nombre
