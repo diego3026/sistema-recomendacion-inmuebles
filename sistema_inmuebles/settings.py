@@ -122,7 +122,7 @@ SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO','https')
 #    "http://localhost:5173",
 #    "http://localhost:8080",
 #]
-CORS_ORIGIN_ALLOW_ALL = true 
+CORS_ORIGIN_ALLOW_ALL = True 
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
