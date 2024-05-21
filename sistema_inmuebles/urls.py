@@ -39,6 +39,7 @@ urlpatterns = [
     path('docs/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
     path('api/', include(router.urls)),
     path('api/login/', LoginAPIView.as_view(), name='login'),
+    path('api/interesesPorUsuario/<int:idUsuario>/deleteInteresesPorUsuario/<int:idInteres>/', InteresPorUsuarioViewSet.as_view({'delete': 'deleteInteresesPorUsuario'}), name='delete_intereses_por_usuario'),
     path('api/register/', RegisterAPIView.as_view(), name='register'),
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
