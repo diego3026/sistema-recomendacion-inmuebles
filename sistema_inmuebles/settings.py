@@ -120,7 +120,8 @@ DATABASES = {
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO','https')
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
-    "http://localhost:8080"
+    "http://localhost:8080",
+    "https://arqui-sistema-recomendacion-85b7038cdf33.herokuapp.com"
 ]
 
 LOGGING = {
