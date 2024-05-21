@@ -1,7 +1,7 @@
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from inmobiliaria.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated
 from inmobiliaria.permissions import IsSuperUser
 from inmobiliaria.serializers import *
 from inmobiliaria.models import *
