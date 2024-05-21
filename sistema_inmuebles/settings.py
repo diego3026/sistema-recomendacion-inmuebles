@@ -116,8 +116,23 @@ DATABASES = {
         'PORT': '5432'
     }
 }
-
+ CORS_ALLOW_HEADERS = [
+    "accept",
+    "accept-encoding",
+    "authorization",
+    "content-type",
+    "dnt",
+    "origin",
+    "user-agent",
+    "x-csrftoken",
+    "x-requested-with",
+] 
+CORS_ALLOW_CREDENTIALS = False
 CORS_ORIGIN_ALLOW_ALL = True 
+CORS_ORIGIN_WHITELIST = (
+    'http://localhost:8000',
+    'http://localhost:5173',
+)
 
 LOGGING = {
     'version': 1,
