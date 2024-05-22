@@ -53,6 +53,32 @@ class InmuebleViewSet(viewsets.ModelViewSet):
     def get(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
 
+    @action(detail=False, methods=['get'])
+    def by_user(self, request,idUsuario):
+        id_usuario = idUsuario
+        if not id_usuario:
+            return Response({'error': 'Se requiere proporcionar el parámetro "idUsuario"'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            usuario = Usuario.objects.get(id=id_usuario)
+        except:
+            return Response({'error':'No hay un usuario con este ID'},status=status.HTTP_404_NOT_FOUND)
+        
+        inmuebles_por_usuario = InmueblePorUsuario.objects.filter(usuario=usuario)
+        inmuebles_por_usuario = list(inmuebles_por_usuario)  # Convertir a lista
+        data = []
+        for inmueble_por_usuario in inmuebles_por_usuario:
+            data.append({
+                'inmueble':InmuebleSerializerCustom(inmueble_por_usuario.inmueble).data,
+                'usuario': UsuarioSerializer(inmueble_por_usuario.usuario).data['username'],
+                'clasificacion': inmueble_por_usuario.clasificacion,
+                'favorito': inmueble_por_usuario.favorito,
+                'comentarios': inmueble_por_usuario.comentarios,
+                'calificacion': inmueble_por_usuario.calificacion
+            })
+
+        return Response(data)
+    
     @action(detail=True, methods=['delete'],permission_classes=[IsSuperUser])
     def delete(self, request, *args, **kwargs):
         instance = self.get_object()
