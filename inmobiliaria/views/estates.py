@@ -69,6 +69,7 @@ class InmuebleViewSet(viewsets.ModelViewSet):
         data = []
         for inmueble_por_usuario in inmuebles_por_usuario:
             data.append({
+                'idInmueblePorUsuario':inmueble_por_usuario.id,
                 'inmueble':InmuebleSerializerCustom(inmueble_por_usuario.inmueble).data,
                 'usuario': UsuarioSerializer(inmueble_por_usuario.usuario).data['username'],
                 'clasificacion': inmueble_por_usuario.clasificacion,
