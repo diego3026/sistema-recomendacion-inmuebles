@@ -40,6 +40,7 @@ urlpatterns = [
     path('api/', include(router.urls)),
     path('api/login/', LoginAPIView.as_view(), name='login'),
     path('api/interesesPorUsuario/<int:idUsuario>/deleteInteresesPorUsuario/<int:idInteres>/', InteresPorUsuarioViewSet.as_view({'delete': 'deleteInteresesPorUsuario'}), name='delete_intereses_por_usuario'),
+    path('api/inmueblesPorUsuario/<int:idUsuario>/obtenerPorUsuario/', InmueblePorUsuarioViewSet.as_view({'get': 'by_user'}), name='inmuebles_por_usuario_by_user'),    
     path('api/register/', RegisterAPIView.as_view(), name='register'),
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
