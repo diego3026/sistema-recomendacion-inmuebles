@@ -153,13 +153,23 @@ class InmueblePorUsuarioViewSet(viewsets.ModelViewSet):
 
         inmueble_data = serializer.validated_data['inmueble']
         usuario_data = serializer.validated_data['usuario']
+        numeroDeClicks_data = serializer.validated_data['numeroDeClicks']
+        favorito_data = serializer.validated_data['favorito']
+        calificacion_data = serializer.validated_data['calificacion']
+        clasificacion_data = serializer.validated_data['clasificacion']
+        comentarios_data = serializer.validated_data['comentarios']
 
         usuario_instance = Usuario.objects.get(username=usuario_data)
         inmueble_instance = Inmueble.objects.get(url=inmueble_data)
 
         try:
             inmueble_usuario_instance = InmueblePorUsuario.objects.create(usuario=usuario_instance,
-                                                                    inmueble=inmueble_instance)
+                                                                    inmueble=inmueble_instance,
+                                                                    numeroDeClicks=numeroDeClicks_data,
+                                                                    favorito=favorito_data,
+                                                                    clasificacion=clasificacion_data,
+                                                                    calificacion=calificacion_data,
+                                                                    comentarios=comentarios_data)
         except IntegrityError:
             return Response({"Ya existe una usuario para este inmueble con este nombre"}, status=status.HTTP_302_FOUND)
 
