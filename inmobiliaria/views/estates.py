@@ -140,7 +140,6 @@ class InmueblePorUsuarioViewSet(viewsets.ModelViewSet):
     
 
     def update(self, request, *args, **kwargs):
-        permission_classes = [IsSuperUser]
         instance = self.get_object()
         serializer = self.get_serializer(instance, data=request.data)
         serializer.is_valid(raise_exception=True)
