@@ -111,6 +111,7 @@ class InmueblePorUsuarioViewSet(viewsets.ModelViewSet):
         data = response.data
         for item in data:
             inmueble_url = item.get('inmueble')
+            print(inmueble_url)
             if inmueble_url:
                 try:
                     # Buscar el inmueble por URL
