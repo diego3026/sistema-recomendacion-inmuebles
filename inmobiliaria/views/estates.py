@@ -109,15 +109,17 @@ class InmueblePorUsuarioViewSet(viewsets.ModelViewSet):
         response = super().list(request, *args, **kwargs)
         
         data = response.data
-        
         for item in data:
-            item['inmueble'] = item['inmueble']['id']
-
-        # Crear una nueva respuesta con la data modificada
-        response = Response(data, status=status.HTTP_200_OK)
+            inmueble_url = item.get('inmueble')
+            if inmueble_url:
+                try:
+                    # Buscar el inmueble por URL
+                    inmueble = Inmueble.objects.get(url=inmueble_url)
+                    item['inmueble'] = inmueble.id  # Aquí se obtiene el ID
+                except Inmueble.DoesNotExist:
+                    item['inmueble'] = None  # Manejo de error si el inmueble no existe
         
-        return response
-
+        return Response(data, status=status.HTTP_200_OK)
     
     @action(detail=False, methods=['get'])
     def by_user(self, request,idUsuario):
