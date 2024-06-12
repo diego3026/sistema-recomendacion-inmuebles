@@ -11,6 +11,16 @@ class TipoDeInmuebleSerializer(serializers.ModelSerializer):
         model = TipoDeInmueble
         fields = '__all__'
 
+class InmuebleSerializerCustom(serializers.ModelSerializer):
+
+    class Meta:
+        model = Inmueble
+        fields = [
+            'id',
+            'nombre',
+            'precio'
+        ]
+
 class InmuebleSerializer(serializers.ModelSerializer):
     sector = SectorSerializer()
     ciudad = CiudadSerializer()

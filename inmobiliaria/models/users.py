@@ -20,6 +20,10 @@ class UsuarioManager(BaseUserManager):
         user.is_superuser = True
         user.save(using=self._db)
         return user
+    
+    def set_password(self, user, password):
+        user.set_password(password)
+        user.save(using=self._db)
 
 class Usuario(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(unique=True)
@@ -37,8 +41,12 @@ class Usuario(AbstractBaseUser, PermissionsMixin):
     USERNAME_FIELD = 'username'
     REQUIRED_FIELDS = ['nombre', 'apellido', 'email', 'edad']
 
+    def set_password(self, password):
+        self.password = make_password(password)
+        self.save()
+    
     def __str__(self):
-        return f"{self.nombre} {self.apellido}"
+        return f"{self.username}"
 
 class InteresPorUsuario(models.Model):
     usuario = models.ForeignKey(Usuario, on_delete=models.CASCADE)

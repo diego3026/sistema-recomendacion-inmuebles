@@ -49,12 +49,27 @@ class InteresPorUsuarioViewSet(viewsets.ModelViewSet):
         instance = self.get_object()
         self.perform_destroy(instance)
         return Response({'status': 'interes por usuario deleted'}, status=status.HTTP_204_NO_CONTENT)
+        
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
         serializer = self.get_serializer(instance, data=request.data)
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
         return Response(serializer.data)
+
+    @action(detail=False, methods=['delete'],permission_classes=[IsAuthenticated])
+    def deleteInteresesPorUsuario(self, request, idUsuario=None, idInteres=None):
+        usuario_id = idUsuario
+        interes_id = idInteres
+
+        try:
+            usuario_instance = Usuario.objects.get(id=usuario_id)
+            interes_instance = Interes.objects.get(id=interes_id)
+            interes_por_usuario = InteresPorUsuario.objects.get(usuario=usuario_instance, interes=interes_instance)
+            interes_por_usuario.delete()
+            return Response({'message': 'Interés eliminado exitosamente'}, status=status.HTTP_204_NO_CONTENT)
+        except (Usuario.DoesNotExist, Interes.DoesNotExist, InteresPorUsuario.DoesNotExist):
+            return Response({'error': 'La relación entre usuario e interés no existe'}, status=status.HTTP_404_NOT_FOUND)
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
