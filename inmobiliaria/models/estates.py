@@ -37,7 +37,7 @@ class Inmueble(models.Model):
     caracteristicas = models.ManyToManyField(Caracteristica, related_name='caracteristicas', blank=True)
 
     def __str__(self):
-        return self.nombre
+        return self.url
 
 class InmueblePorUsuario(models.Model):
     usuario = models.ForeignKey(Usuario, on_delete=models.CASCADE)
