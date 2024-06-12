@@ -104,7 +104,7 @@ class InmueblePorUsuarioViewSet(viewsets.ModelViewSet):
     def get(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
 
-    @action(detail=True, methods=['get'])
+    @action(detail=False, methods=['get'])
     def get_filtro(self, request, *args, **kwargs):
         response = super().list(request, *args, **kwargs)
         
