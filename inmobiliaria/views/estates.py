@@ -105,6 +105,20 @@ class InmueblePorUsuarioViewSet(viewsets.ModelViewSet):
         return super().list(request, *args, **kwargs)
 
     
+    def get_filtro(self, request, *args, **kwargs):
+        response = super().list(request, *args, **kwargs)
+        
+        data = response.data
+        
+        for item in data:
+            item['inmueble'] = item['inmueble']['id']
+
+        # Crear una nueva respuesta con la data modificada
+        response = Response(data, status=status.HTTP_200_OK)
+        
+        return response
+
+    
     @action(detail=False, methods=['get'])
     def by_user(self, request,idUsuario):
         id_usuario = idUsuario
