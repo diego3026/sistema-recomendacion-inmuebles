@@ -154,7 +154,31 @@ class InmueblePorUsuarioViewSet(viewsets.ModelViewSet):
         instance = self.get_object()
         self.perform_destroy(instance)
         return Response({'status': 'inmueble por usuario deleted'}, status=status.HTTP_204_NO_CONTENT)
-    
+
+    def partial_update(self, request, pk, *args, **kwargs):
+        instance = self.get_object()
+
+        if 'clasificacion' in request.data:
+            instance.clasificacion = request.data['clasificacion']
+        if 'numeroDeClicks' in request.data:
+            numero_de_clicks_delta = request.data.get('numeroDeClicks', 0)
+            if instance.numeroDeClicks is None:
+                instance.numeroDeClicks = numero_de_clicks_delta
+            else:
+                instance.numeroDeClicks += numero_de_clicks_delta
+        if 'favorito' in request.data:
+            instance.favorito = request.data['favorito']
+        if 'comentarios' in request.data:
+            instance.comentarios = request.data['comentarios']
+        if 'calificacion' in request.data:
+            instance.calificacion = request.data['calificacion']
+
+        # Save the updated object
+        instance.save()
+
+        # Get the serializer and return the response
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data)
 
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
