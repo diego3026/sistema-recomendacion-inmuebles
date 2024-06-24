@@ -104,6 +104,23 @@ class InmueblePorUsuarioViewSet(viewsets.ModelViewSet):
     def get(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
 
+    @action(detail=False, methods=['get'])
+    def get_filtro(self, request, *args, **kwargs):
+        response = super().list(request, *args, **kwargs)
+        
+        data = response.data
+        for item in data:
+            inmueble_url = item.get('inmueble')
+            print(inmueble_url)
+            if inmueble_url:
+                try:
+                    # Buscar el inmueble por URL
+                    inmueble = Inmueble.objects.get(url=inmueble_url)
+                    item['inmueble'] = inmueble.id  # Aquí se obtiene el ID
+                except Inmueble.DoesNotExist:
+                    item['inmueble'] = None  # Manejo de error si el inmueble no existe
+        
+        return Response(data, status=status.HTTP_200_OK)
     
     @action(detail=False, methods=['get'])
     def by_user(self, request,idUsuario):
@@ -137,7 +154,31 @@ class InmueblePorUsuarioViewSet(viewsets.ModelViewSet):
         instance = self.get_object()
         self.perform_destroy(instance)
         return Response({'status': 'inmueble por usuario deleted'}, status=status.HTTP_204_NO_CONTENT)
-    
+
+    def partial_update(self, request, pk, *args, **kwargs):
+        instance = self.get_object()
+
+        if 'clasificacion' in request.data:
+            instance.clasificacion = request.data['clasificacion']
+        if 'numeroDeClicks' in request.data:
+            numero_de_clicks_delta = request.data.get('numeroDeClicks', 0)
+            if instance.numeroDeClicks is None:
+                instance.numeroDeClicks = numero_de_clicks_delta
+            else:
+                instance.numeroDeClicks += numero_de_clicks_delta
+        if 'favorito' in request.data:
+            instance.favorito = request.data['favorito']
+        if 'comentarios' in request.data:
+            instance.comentarios = request.data['comentarios']
+        if 'calificacion' in request.data:
+            instance.calificacion = request.data['calificacion']
+
+        # Save the updated object
+        instance.save()
+
+        # Get the serializer and return the response
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data)
 
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
