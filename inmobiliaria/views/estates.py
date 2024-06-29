@@ -7,6 +7,7 @@ from rest_framework.response import Response
 from inmobiliaria.permissions import IsSuperUser
 from inmobiliaria.serializers import *
 from inmobiliaria.models import *
+from inmobiliaria.filtrado_colaborativo import main
 
 class TipoDeInmuebleViewSet(viewsets.ModelViewSet):
     queryset = TipoDeInmueble.objects.all()
@@ -67,7 +68,6 @@ class InmuebleViewSet(viewsets.ModelViewSet):
         self.perform_update(serializer)
         return Response(serializer.data)
 
-
     def create(self, request, *args, **kwargs):
         permission_classes = [IsSuperUser]
         if isinstance(request.data, list):
@@ -80,9 +80,9 @@ class InmuebleViewSet(viewsets.ModelViewSet):
                     try:
                         instance = serializer.create(serializer.data)
                         serialized_data.append(instance)
-                    except ValidationError as e:
+                    except Exception as e:
                         errors.append({'error': str(e), 'data': data})
-                else:
+                else: 
                     errors.append({'error': serializer.errors, 'data': data})
 
             if errors:
@@ -123,6 +123,21 @@ class InmueblePorUsuarioViewSet(viewsets.ModelViewSet):
         return Response(data, status=status.HTTP_200_OK)
     
     @action(detail=False, methods=['get'])
+    def get_recomendations(self, request, usuario):
+        username = usuario
+        list_ids = main(username)
+
+        if list_ids:
+            objects = Inmueble.objects.filter(id=list_ids)
+            serializer = Inmueble(objects, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        else:
+            if len(list_ids) == 0:
+                return Response({'info': 'No hay recomendaciones'}, status=status.HTTP_200_OK) 
+            else:
+                return Response({'error': 'ingresa un usuario valido'}, status=status.HTTP_400_BAD_REQUEST) 
+
+    @action(detail=False, methods=['get'])
     def by_user(self, request,idUsuario):
         id_usuario = idUsuario
         if not id_usuario:
@@ -155,6 +170,31 @@ class InmueblePorUsuarioViewSet(viewsets.ModelViewSet):
         self.perform_destroy(instance)
         return Response({'status': 'inmueble por usuario deleted'}, status=status.HTTP_204_NO_CONTENT)
     
+    def partial_update(self, request, pk, *args, **kwargs):
+        instance = self.get_object()
+
+        if 'clasificacion' in request.data:
+            instance.clasificacion = request.data['clasificacion']
+        if 'numeroDeClicks' in request.data:
+            numero_de_clicks_delta = request.data.get('numeroDeClicks', 0)
+            if instance.numeroDeClicks is None:
+                instance.numeroDeClicks = numero_de_clicks_delta
+            else:
+                instance.numeroDeClicks += numero_de_clicks_delta
+        if 'favorito' in request.data:
+            instance.favorito = request.data['favorito']
+        if 'comentarios' in request.data:
+            instance.comentarios = request.data['comentarios']
+        if 'calificacion' in request.data:
+            instance.calificacion = request.data['calificacion']
+
+        # Save the updated object
+        instance.save()
+
+        # Get the serializer and return the response
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data)
+
 
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
