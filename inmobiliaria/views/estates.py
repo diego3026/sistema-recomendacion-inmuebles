@@ -124,18 +124,21 @@ class InmueblePorUsuarioViewSet(viewsets.ModelViewSet):
     
     @action(detail=False, methods=['get'])
     def get_recomendations(self, request, usuario):
+        if usuario is None:
+            return Response({'error': 'Usuario no proporcionado'}, status=status.HTTP_400_BAD_REQUEST)
+
         username = usuario
         list_ids = main(username)
-
+    
         if list_ids:
-            objects = Inmueble.objects.filter(id=list_ids)
-            serializer = Inmueble(objects, many=True)
+            objects = Inmueble.objects.filter(id__in=list_ids)  
+            serializer = InmuebleSerializer(objects, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
         else:
             if len(list_ids) == 0:
                 return Response({'info': 'No hay recomendaciones'}, status=status.HTTP_200_OK) 
             else:
-                return Response({'error': 'ingresa un usuario valido'}, status=status.HTTP_400_BAD_REQUEST) 
+                return Response({'error': 'Ingresa un usuario válido'}, status=status.HTTP_400_BAD_REQUEST) 
 
     @action(detail=False, methods=['get'])
     def by_user(self, request,idUsuario):
