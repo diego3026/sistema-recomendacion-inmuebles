@@ -6,6 +6,7 @@ import itertools
 import pandas as pd
 from psycopg2 import sql
 from sklearn.metrics.pairwise import cosine_similarity
+from rest_framework.response import Response
 
 # Constants
 URL_API = 'https://arqui-sistema-recomendacion-85b7038cdf33.herokuapp.com/api/inmueblesPorUsuario/get_filtro/'
@@ -152,8 +153,6 @@ def obtener_datosLimpios(inmuebles,usuarios):
             for inmueble in inmuebles:
                 id_inmueble = inmueble[0]
                 datosLimpios[usuario][id_inmueble] = None
-        else:
-            print(f"El inmueble '{id_inmueble}' ya existe")
 
     return datosLimpios
 
@@ -220,7 +219,7 @@ def generar_recomendaciones(usuario, datosLimpios):
     cosine_sim = cosine_similarity(ratings_df.fillna(0))
     cosine_sim_df = pd.DataFrame(cosine_sim, index=ratings_df.index, columns=ratings_df.index)
     predicted_ratings = predecir_valoraciones(usuario, ratings_df, cosine_sim_df)
-    print(predicted_ratings)
+    # print(predicted_ratings)
     return predicted_ratings.index.tolist()
 
 def main(usuario):
@@ -239,8 +238,8 @@ def main(usuario):
     puntajes_por_usuarios = puntajes_usuarios(coincidencias_todos_usuarios, vCoincidenciasPorUsuario)
     datosLimpios = obtener_datosLimpios(resultados_inmuebles,resultados_usuarios)
     datos = calcular_clasificaciones(datos_api, puntajes_por_usuarios, PESOS,datosLimpios)
-    print(datos)
+    # print(datos)
     # Guardar y generar recomendaciones
-    guardar_datos(datos)
+    # guardar_datos(datos)
     recomendaciones = generar_recomendaciones(usuario=usuario, datosLimpios=datos)
     return recomendaciones
