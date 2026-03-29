@@ -7,23 +7,33 @@ import pandas as pd
 from psycopg2 import sql
 from sklearn.metrics.pairwise import cosine_similarity
 from rest_framework.response import Response
+import environ
+from pathlib import Path
 
-# Constants
-URL_API = 'https://arqui-sistema-recomendacion-85b7038cdf33.herokuapp.com/api/inmueblesPorUsuario/get_filtro/'
-URL_API_INMUEBLES = 'https://arqui-sistema-recomendacion-85b7038cdf33.herokuapp.com/api/inmuebles/'
-URL_API_LOGIN = 'https://arqui-sistema-recomendacion-85b7038cdf33.herokuapp.com/api/login/'
-URL_API_PREFERENCIAS = 'https://arqui-sistema-recomendacion-85b7038cdf33.herokuapp.com/api/interesesPorUsuario/'
+env = environ.Env(
+    DEBUG=(bool, False)
+)
+
+BASE_DIR = Path(__file__).resolve().parent.parent
+environ.Env.read_env(BASE_DIR / '.env')
+
+URL_API_GENERAL = 'http://127.0.0.1:8000/api'
+
+URL_API = f'{URL_API_GENERAL}/inmueblesPorUsuario/get_filtro/'
+URL_API_INMUEBLES = f'{URL_API_GENERAL}/inmuebles/'
+URL_API_LOGIN = f'{URL_API_GENERAL}/login/'
+URL_API_PREFERENCIAS = f'{URL_API_GENERAL}/interesesPorUsuario/'
 
 LOGIN_DATA = {
-    'username': 'diego3026',
-    'password': '3174748557d'
+    'username': 'api_recomendador',
+    'password': 'superrecomendador'
 }
 
 DB_CONFIG = {
-    'host': 'dbarquitecura.postgres.database.azure.com',
+    'host': env('HOST'),
     'database': 'postgres',
-    'user': 'gidsyc',
-    'password': 'Semillero2024'
+    'user': env('USER'),
+    'password': env('PASSWORD')
 }
 
 PESOS = [4, 2, 1, 3]  # [favorito, calificacion, clics, preferencia]
@@ -214,32 +224,118 @@ def predecir_valoraciones(user, ratings_df, sim_df):
 
     return predicted_ratings.sort_values(ascending=False)
 
-def generar_recomendaciones(usuario, datosLimpios):
+def generar_recomendaciones(usuario, datosLimpios, datos_api):
     ratings_df = pd.DataFrame(datosLimpios).T
+
+    # Si no hay inmuebles aún
+    if ratings_df.shape[1] == 0:
+        return obtener_inmuebles_populares(datos_api)
+
+    # Si el usuario no existe aún
+    if usuario not in ratings_df.index:
+        return obtener_inmuebles_populares(datos_api)
+
+    # Si hay muy pocos usuarios
+    if ratings_df.shape[0] < 2:
+        return obtener_inmuebles_populares(datos_api)
+
     cosine_sim = cosine_similarity(ratings_df.fillna(0))
     cosine_sim_df = pd.DataFrame(cosine_sim, index=ratings_df.index, columns=ratings_df.index)
+
     predicted_ratings = predecir_valoraciones(usuario, ratings_df, cosine_sim_df)
-    # print(predicted_ratings)
+
+    if predicted_ratings.empty:
+        return obtener_inmuebles_populares(datos_api)
+
     return predicted_ratings.index.tolist()
 
+def obtener_inmuebles_populares(datos_api, limite=10):
+    if not datos_api:
+        return []
+
+    ranking = {}
+
+    for item in datos_api:
+        inmueble = item.get('inmueble')
+
+        score = (
+            (item.get('numeroDeClicks') or 0) +
+            (item.get('calificacion') or 0) * 2 +
+            (1 if item.get('favorito') else 0) * 3
+        )
+
+        if inmueble not in ranking:
+            ranking[inmueble] = 0
+
+        ranking[inmueble] += score
+
+    ranking_ordenado = sorted(ranking.items(), key=lambda x: x[1], reverse=True)
+
+    return [i[0] for i in ranking_ordenado[:limite]]
+
 def main(usuario):
-    # Obtener datos de la API y la base de datos
+
     preferencias = get_datos_preferencias_por_usuario()
-    columnas, resultados_inmuebles = consultar_base_de_datos('SELECT id FROM inmobiliaria_inmueble')
-    columnas_user, resultados_usuarios = consultar_base_de_datos('SELECT id, username FROM inmobiliaria_usuario')
+
+    columnas, resultados_inmuebles = consultar_base_de_datos(
+        'SELECT id FROM inmobiliaria_inmueble'
+    )
+
+    columnas_user, resultados_usuarios = consultar_base_de_datos(
+        'SELECT id, username FROM inmobiliaria_usuario'
+    )
+
+    if not resultados_inmuebles:
+        return []
+
+    if not resultados_usuarios:
+        return []
+
+
     inmuebles = get_datos_api(URL_API_INMUEBLES)
     datos_api = get_datos_api(URL_API)
+
+    # Caso 1: sistema vacío
+    if not resultados_inmuebles:
+        return obtener_inmuebles_populares(datos_api)
+
+    if not resultados_usuarios:
+        return obtener_inmuebles_populares(datos_api)
 
     # Procesar datos
     intereses_por_usuario = procesar_intereses(preferencias)
     inmuebles_con_caracteristicas = procesar_inmuebles(inmuebles)
-    coincidencias_todos_usuarios = calcular_coincidencias(intereses_por_usuario, inmuebles_con_caracteristicas)
-    vCoincidenciasPorUsuario = valores_coincidencia_por_usuario(intereses_por_usuario, 10)
-    puntajes_por_usuarios = puntajes_usuarios(coincidencias_todos_usuarios, vCoincidenciasPorUsuario)
-    datosLimpios = obtener_datosLimpios(resultados_inmuebles,resultados_usuarios)
-    datos = calcular_clasificaciones(datos_api, puntajes_por_usuarios, PESOS,datosLimpios)
-    # print(datos)
-    # Guardar y generar recomendaciones
-    # guardar_datos(datos)
-    recomendaciones = generar_recomendaciones(usuario=usuario, datosLimpios=datos)
+    coincidencias_todos_usuarios = calcular_coincidencias(
+        intereses_por_usuario,
+        inmuebles_con_caracteristicas
+    )
+
+    vCoincidenciasPorUsuario = valores_coincidencia_por_usuario(
+        intereses_por_usuario,
+        10
+    )
+
+    puntajes_por_usuarios = puntajes_usuarios(
+        coincidencias_todos_usuarios,
+        vCoincidenciasPorUsuario
+    )
+
+    datosLimpios = obtener_datosLimpios(
+        resultados_inmuebles,
+        resultados_usuarios
+    )
+
+    datos = calcular_clasificaciones(
+        datos_api,
+        puntajes_por_usuarios,
+        PESOS,
+        datosLimpios
+    )
+
+    recomendaciones = generar_recomendaciones(
+        usuario=usuario,
+        datosLimpios=datos,
+        datos_api=datos_api
+    )
+
     return recomendaciones
